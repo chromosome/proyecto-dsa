@@ -28,6 +28,8 @@ class NODE {
         double w        = 0.0;
         int depth       = 0;
 
+        int count_colors(char);
+
 };
 
 
@@ -64,6 +66,7 @@ PR_QUADTREE::PR_QUADTREE(){
 PR_QUADTREE::~PR_QUADTREE(){}
 
 /////////////////////////////////////////////////////////////////////////////////////////
+
 
 // devuelve un puntero a nodo con el cuadrante mas pequeño que incluye la posicion (x,y)
 NODE* PR_QUADTREE::search_node(double x, double y){
@@ -323,6 +326,19 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+// devuelve el total de nodos hijo del color especificado
+int NODE::count_colors(char x){
+    int ctr = 0;
+    if(color == 'g'){
+        if(first->color     == x) ctr++;
+        if(second->color    == x) ctr++;
+        if(third->color     == x) ctr++;
+        if(fourth->color    == x) ctr++;
+    }
+    return(ctr);
+}
+
+
 int PR_QUADTREE::remove(double x, double y){
 
     NODE* node = search_city(x,y);
@@ -331,23 +347,52 @@ int PR_QUADTREE::remove(double x, double y){
     if(node == NULL)
         return(-1);
 
-    // si solo existe el nodo root
- //   if(node == _root)
-//        eliminar datos y nodo;
+    // se borran los datos del nodo y se reinicia
+    delete node->data;
+    node->data = NULL;
+    node->color = 'w';
+    _totalPoints--;
 
-    // asdasd
+    // si solo existia el nodo root se retorna
+    if(node == _root)
+        return(0);
+
+    // se compacta el arbol de forma iterativa
+    NODE* father = node->father;
+
+    while(father != NULL) {
+
+        // se cuentan los colores de los nodos hijos
+        int g, w, b;
+        g = father->count_colors('g');
+        w = father->count_colors('w');
+        b = 4 - g - w;
+
+        // si solo quedan nodos blancos se eliminan y nodo padre se blanquea
+        if(w == 4){
+
+            delete father->first;
+            delete father->second;
+            delete father->third;
+            delete father->fourth;
+            father->color = 'w';
+            father = father->father;
+
+        // si solo queda un nodo negro o un nodo gris entonces este nodo reemplaza al padre
+        } else if (b + g == 1) {
+
+            asdf
+
+        // asdf
+        }
 
 
-    // asdasd
-
-
-    // asdasdad
+        // condicion de termino de compactacion
 
 
 
 
-
-
+    }
 
 
 
