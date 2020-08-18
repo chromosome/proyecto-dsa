@@ -42,6 +42,7 @@ class PR_QUADTREE {
         double _y           = -181.0;
         double _w           = 362.0;
         int _totalPoints    = 0;
+        int _maxDepth       = 0;
 
         PR_QUADTREE();
         ~PR_QUADTREE();
@@ -273,6 +274,10 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->w = temp->w/2;
                 temp->fourth->w = temp->w/2;
 
+                // se actualiza el contador de maxima profundidad del quadtree :p
+                if(_maxDepth < node->depth + 1)
+                    _maxDepth = node->depth + 1;
+
                 // condicion de termino para creacion de subnodos
                 if(cuadrante1 != cuadrante2){
                     break;
@@ -352,14 +357,14 @@ int PR_QUADTREE::remove(double x, double y){
     delete node->data;
     node->data = NULL;
     node->color = 'w';
-    _totalPoints--;
+    _totalPoints -= 1;
 
     // si solo existia el nodo root se retorna
     if(node == _root)
         return(0);
 
-    // se compacta el arbol de forma iterativa
-    while(father == NULL) {
+    // se COMPACTA el arbol de forma iterativa
+    while(father != NULL) {
 
         // es necesaria una referencia directa al padre para evitar casos problematicos
         // en que el nodo elimine referencias asi mismo usando node->father->{first,second,...}
@@ -400,29 +405,11 @@ int PR_QUADTREE::remove(double x, double y){
             father->fourth  = NULL;
             node = father; // para siguiente iteracion
 
-        // si solo queda un nodo gris entonces se sube un nivel y reemplaza al nodo padre
-        } else if (g == 1 && w == 3) {
-
-            father->first   = node->first;
-            father->second  = node->second;
-            father->third   = node->third;
-            father->fourth  = node->fourth;
-            delete node;
-            node = father; // para siguiente iteracion
-
-            // se actualizan las dimensiones y profundidades de todos los subnodos de father
-            dfs -> updateAllSub_X_Y_();
-            dfs -> updateAllSub_DEPTH();
-
-        // condicion de termino de compactacion b + g >= 2
+        // condicion de termino de compactacion (g >= 1 || b >= 2)
         } else {
-
             return(0);
-
         }
-
     }
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -498,7 +485,6 @@ int main(int argc, char **argv) {
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
-        //cout << city->geoPointX << " " << city->geoPointY << endl;
         cities.insert(city->geoPointX, city->geoPointY, city);
 
         ctr++;
@@ -507,10 +493,19 @@ int main(int argc, char **argv) {
 
     file.close();
 
+    // pruebas!!!
     NODE* x = cities.search_node((double)8.3766667,(double)-78.9591667);
-    //cout << endl << x->data->population << endl;
-    //cout << endl << x->depth << endl;
-    //cout << cities._totalPoints;
+    if(x != NULL)
+        cout << "existe la ciudad <8.3766667,-78.9591667>" << endl;
+    cout << "poblacion ciudad <8.3766667,-78.9591667>: " << x->data->population << endl;
+    cout << "profundidad nodo de ciudad <8.3766667,-78.9591667>: " << x->depth << endl;
+    cout << "total de ciudades en quadtree: " << cities._totalPoints << endl;
+    cout << "maxima profundidad de nodo en quadtree: " << cities._maxDepth << endl;
+    if(cities.remove((double)8.3766667,(double)-78.9591667) == 0)
+        cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
+    x = cities.search_city((double)8.3766667,(double)-78.9591667);
+    if(x == NULL)
+        cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
     //while(1){}
 
     return(0);
