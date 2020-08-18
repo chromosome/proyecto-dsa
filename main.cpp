@@ -2,21 +2,23 @@
 #include <fstream>
 #include <sstream>
 
+
 using namespace std;
 
 
 class CITY {
     public:
-        string country;
-        string city;
-        string accentCity;
-        string region;
+        //string country;
+        //string city;
+        //string accentCity;
+        //string region;
         int population;
-        double latitude;
-        double longitude;
+        //double latitude;
+        //double longitude;
         double geoPointX;
         double geoPointY;
 };
+
 
 class NODE {
     public:
@@ -351,6 +353,7 @@ int main(int argc, char **argv) {
     //file.open("mini.csv");
     string line;
     string word;
+    string temp;
     int ctr = 0;
 
     PR_QUADTREE cities;
@@ -366,19 +369,26 @@ int main(int argc, char **argv) {
         /*  Country;City;AccentCity;Region;
         Population;Latitude;Longitude;geopoint */
 
-        getline(ss,city->country,';');
-        getline(ss,city->city,';');
-        getline(ss,city->accentCity,';');
-        getline(ss,city->region,';');
+        getline(ss,temp,';');
+        //city->country = temp;
+
+        getline(ss,temp,';');
+        //city->city = temp;
+
+        getline(ss,temp,';');
+        //city->accentCity = temp;
+
+        getline(ss,temp,';');
+        //city->region = temp;
 
         getline(ss,word,';');
         city->population = stod(word);
 
         getline(ss,word,';');
-        city->latitude = stold(word);
+        //city->latitude = stold(word);
 
         getline(ss,word,';');
-        city->longitude = stold(word);
+        //city->longitude = stold(word);
 
         getline(ss,word,',');
         city->geoPointX = stold(word);
@@ -397,8 +407,8 @@ int main(int argc, char **argv) {
     file.close();
 
     NODE* x = cities.search_node((double)8.3766667,(double)-78.9591667);
-    cout << endl << x->data->city << endl;
-    //while(1){}
+    cout << endl << x->data->population << endl;
+    while(1){}
 
     return(0);
 
