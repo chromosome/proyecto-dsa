@@ -342,6 +342,7 @@ int NODE::count_colors(char x){
 int PR_QUADTREE::remove(double x, double y){
 
     NODE* node = search_city(x,y);
+    NODE* father = node->father;
 
     // se comprueba la existencia de la ciudad
     if(node == NULL)
@@ -358,9 +359,11 @@ int PR_QUADTREE::remove(double x, double y){
         return(0);
 
     // se compacta el arbol de forma iterativa
-    NODE* father = node->father;
+    while(father == NULL) {
 
-    while(father != NULL) {
+        // es necesaria una referencia directa al padre para evitar casos problematicos
+        // en que el nodo elimine referencias asi mismo usando node->father->{first,second,...}
+        father = node->father;
 
         // se cuentan los colores de los nodos hijos
         int g, w, b;
@@ -375,29 +378,50 @@ int PR_QUADTREE::remove(double x, double y){
             delete father->second;
             delete father->third;
             delete father->fourth;
+            father->first   = NULL;
+            father->second  = NULL;
+            father->third   = NULL;
+            father->fourth  = NULL;
             father->color = 'w';
-            father = father->father;
+            node = father; // para siguiente iteracion
 
-        // si solo queda un nodo negro o un nodo gris entonces este nodo reemplaza al padre
-        } else if (b + g == 1) {
+        // si solo queda un nodo negro entonces reemplaza al nodo padre y se eliminan los hijos
+        } else if (b == 1 && w == 3) {
 
-            asdf
+            father->color = 'b';
+            father->data = node->data;
+            delete father->first;
+            delete father->second;
+            delete father->third;
+            delete father->fourth;
+            father->first   = NULL;
+            father->second  = NULL;
+            father->third   = NULL;
+            father->fourth  = NULL;
+            node = father; // para siguiente iteracion
 
-        // asdf
+        // si solo queda un nodo gris entonces se sube un nivel y reemplaza al nodo padre
+        } else if (g == 1 && w == 3) {
+
+            father->first   = node->first;
+            father->second  = node->second;
+            father->third   = node->third;
+            father->fourth  = node->fourth;
+            delete node;
+            node = father; // para siguiente iteracion
+
+            // se actualizan las dimensiones y profundidades de todos los subnodos de father
+            dfs -> updateAllSub_X_Y_();
+            dfs -> updateAllSub_DEPTH();
+
+        // condicion de termino de compactacion b + g >= 2
+        } else {
+
+            return(0);
+
         }
 
-
-        // condicion de termino de compactacion
-
-
-
-
     }
-
-
-
-
-
 
 }
 
