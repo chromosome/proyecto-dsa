@@ -8,13 +8,7 @@ using namespace std;
 
 class CITY {
     public:
-        //string country;
-        //string city;
-        //string accentCity;
-        //string region;
         int population;
-        //double latitude;
-        //double longitude;
         double geoPointX;
         double geoPointY;
 };
@@ -24,7 +18,7 @@ class NODE {
     public:
         CITY* data      = NULL;
         char color      = 'w';
-        //NODE* father    = NULL;
+        NODE* father    = NULL;
         NODE* first     = NULL;
         NODE* second    = NULL;
         NODE* third     = NULL;
@@ -32,8 +26,7 @@ class NODE {
         double x        = 0.0;
         double y        = 0.0;
         double w        = 0.0;
-        double h        = 0.0;
-        //int depth       = 0;
+        int depth       = 0;
 
 };
 
@@ -42,16 +35,16 @@ class PR_QUADTREE {
 
     public:
 
-        NODE* _root     = NULL;
-        double _x       = -181.0;
-        double _y       = -181.0;
-        double _w       = 362.0;
-        double _h       = 362.0;
+        NODE* _root         = NULL;
+        double _x           = -181.0;
+        double _y           = -181.0;
+        double _w           = 362.0;
+        int _totalPoints    = 0;
 
         PR_QUADTREE();
         ~PR_QUADTREE();
         void insert(double, double, CITY*);
-        void remove(double, double);
+        int remove(double, double);
         int total_cities(double, double, int);
         void total_population(double, double);
         void total_population_region(double, double, int);
@@ -65,7 +58,6 @@ PR_QUADTREE::PR_QUADTREE(){
     _root->x = _x;
     _root->y = _y;
     _root->w = _w;
-    _root->h = _h;
 }
 
 
@@ -82,7 +74,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al primer cuadrante?
         if(node->x <= x && x < node->x + node->w/2 &&
-           node->y + node->h/2 <= y && y < node->y + node->h){
+           node->y + node->w/2 <= y && y < node->y + node->w){
 
                 if(node->color != 'g')
                     break;
@@ -91,7 +83,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al segundo cuadrante?
         } else if(node->x + node->w/2 <= x && x < node->x + node->w &&
-           node->y + node->h/2 <= y && y < node->y + node->h){
+           node->y + node->w/2 <= y && y < node->y + node->w){
 
                 if(node->color != 'g')
                     break;
@@ -100,7 +92,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al tercer cuadrante?
         } else if(node->x <= x && x < node->x + node->w/2 &&
-           node->y <= y && y < node->y + node->h/2){
+           node->y <= y && y < node->y + node->w/2){
 
                 if(node->color != 'g')
                     break;
@@ -109,7 +101,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al cuarto cuadrante?
         } else if(node->x + node->w/2 <= x && x < node->x + node->w &&
-           node->y <= y && y < node->y + node->h/2){
+           node->y <= y && y < node->y + node->w/2){
 
                 if(node->color != 'g')
                     break;
@@ -144,6 +136,8 @@ NODE* PR_QUADTREE::search_city(double x, double y){
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void PR_QUADTREE::insert(double x, double y, CITY* city){
+
+    double h = _w;
 
     // se prueba la preexistencia de una ciudad en el mismo punto (en ese caso se ignora)
     NODE* node = search_node(x,y);
@@ -187,88 +181,94 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 // se marca como gris
                 temp->color = 'g';
 
-                // se crean los 4 nodos hijo
-                temp->first = new NODE;
-                temp->first->color = 'w';
-                temp->first->x = temp->x;
-                temp->first->y = temp->y + temp->h/2;
-                temp->first->w = temp->w/2;
-                temp->first->h = temp->h/2;
+                // se comprueba en que subcuadrante se encuentra cada punto
 
-                temp->second = new NODE;
-                temp->second->color = 'w';
-                temp->second->x = temp->x + temp->w/2;
-                temp->second->y = temp->y + temp->h/2;
-                temp->second->w = temp->w/2;
-                temp->second->h = temp->h/2;
-
-                temp->third = new NODE;
-                temp->third->color = 'w';
-                temp->third->x = temp->x;
-                temp->third->y = temp->y;
-                temp->third->w = temp->w/2;
-                temp->third->h = temp->h/2;
-
-                temp->fourth = new NODE;
-                temp->fourth->color = 'w';
-                temp->fourth->x = temp->x + temp->w/2;
-                temp->fourth->y = temp->y;
-                temp->fourth->w = temp->w/2;
-                temp->fourth->h = temp->h/2;
-
-                // se comprueba en que cuadrante se encuentra cada punto
-
-                // punto1 pertenece al primer cuadrante?
+                // punto1 pertenece al primer subcuadrante?
                 if(temp->x <= x && x < temp->x + temp->w/2 &&
-                   temp->y + temp->h/2 <= y && y < temp->y + temp->h){
+                   temp->y + temp->w/2 <= y && y < temp->y + temp->w){
 
                         cuadrante1 = 1;
 
-                // punto1 pertenece al segundo cuadrante?
+                // punto1 pertenece al segundo subcuadrante?
                 } else if(temp->x + temp->w/2 <= x && x < temp->x + temp->w &&
-                   temp->y + temp->h/2 <= y && y < temp->y + temp->h){
+                   temp->y + temp->w/2 <= y && y < temp->y + temp->w){
 
                         cuadrante1 = 2;
 
-                // punto1 pertenece al tercer cuadrante?
+                // punto1 pertenece al tercer subcuadrante?
                 } else if(temp->x <= x && x < temp->x + temp->w/2 &&
-                   temp->y <= y && y < temp->y + temp->h/2){
+                   temp->y <= y && y < temp->y + temp->w/2){
 
                         cuadrante1 = 3;
 
-                // punto1 pertenece al cuarto cuadrante?
+                // punto1 pertenece al cuarto subcuadrante?
                 } else if(temp->x + temp->w/2 <= x && x < temp->x + temp->w &&
-                   temp->y <= y && y < temp->y + temp->h/2){
+                   temp->y <= y && y < temp->y + temp->w/2){
 
                         cuadrante1 = 4;
 
-                }
-
-                // punto2 pertenece al primer cuadrante?
-                if(temp->x <= oldX && oldX < temp->x + temp->w/2 &&
-                   temp->y + temp->h/2 <= oldY && oldY < temp->y + temp->h){
+                // punto2 pertenece al primer subcuadrante?
+                } if(temp->x <= oldX && oldX < temp->x + temp->w/2 &&
+                   temp->y + temp->w/2 <= oldY && oldY < temp->y + temp->w){
 
                         cuadrante2 = 1;
 
-                // punto2 pertenece al segundo cuadrante?
+                // punto2 pertenece al segundo subcuadrante?
                 } else if(temp->x + temp->w/2 <= oldX && oldX < temp->x + temp->w &&
-                   temp->y + temp->h/2 <= oldY && oldY < temp->y + temp->h){
+                   temp->y + temp->w/2 <= oldY && oldY < temp->y + temp->w){
 
                         cuadrante2 = 2;
 
-                // punto2 pertenece al tercer cuadrante?
+                // punto2 pertenece al tercer subcuadrante?
                 } else if(temp->x <= oldX && oldX < temp->x + temp->w/2 &&
-                   temp->y <= oldY && oldY < temp->y + temp->h/2){
+                   temp->y <= oldY && oldY < temp->y + temp->w/2){
 
                         cuadrante2 = 3;
 
-                // punto2 pertenece al cuarto cuadrante?
+                // punto2 pertenece al cuarto subcuadrante?
                 } else if(temp->x + temp->w/2 <= oldX && oldX < temp->x + temp->w &&
-                   temp->y <= oldY && oldY < temp->y + temp->h/2){
+                   temp->y <= oldY && oldY < temp->y + temp->w/2){
 
                         cuadrante2 = 4;
 
                 }
+
+                // se crean los 4 nodos hijo
+                temp->first = new NODE;
+                temp->first->father = node;
+                temp->first->depth = node->depth + 1;
+                temp->first->color = 'w';
+                temp->first->x = temp->x;
+                temp->first->y = temp->y + temp->w/2;
+                temp->first->w = temp->w/2;
+                temp->first->w = temp->w/2;
+
+                temp->second = new NODE;
+                temp->second->father = node;
+                temp->second->depth = node->depth + 1;
+                temp->second->color = 'w';
+                temp->second->x = temp->x + temp->w/2;
+                temp->second->y = temp->y + temp->w/2;
+                temp->second->w = temp->w/2;
+                temp->second->w = temp->w/2;
+
+                temp->third = new NODE;
+                temp->third->father = node;
+                temp->third->depth = node->depth + 1;
+                temp->third->color = 'w';
+                temp->third->x = temp->x;
+                temp->third->y = temp->y;
+                temp->third->w = temp->w/2;
+                temp->third->w = temp->w/2;
+
+                temp->fourth = new NODE;
+                temp->fourth->father = node;
+                temp->fourth->depth = node->depth + 1;
+                temp->fourth->color = 'w';
+                temp->fourth->x = temp->x + temp->w/2;
+                temp->fourth->y = temp->y;
+                temp->fourth->w = temp->w/2;
+                temp->fourth->w = temp->w/2;
 
                 // condicion de termino para creacion de subnodos
                 if(cuadrante1 != cuadrante2){
@@ -315,12 +315,44 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
             }
 
         }
+
+        // se aumenta el contador de puntos del quadtree
+        _totalPoints++;
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void PR_QUADTREE::remove(double x, double y){
+int PR_QUADTREE::remove(double x, double y){
+
+    NODE* node = search_city(x,y);
+
+    // se comprueba la existencia de la ciudad
+    if(node == NULL)
+        return(-1);
+
+    // si solo existe el nodo root
+ //   if(node == _root)
+//        eliminar datos y nodo;
+
+    // asdasd
+
+
+    // asdasd
+
+
+    // asdasdad
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -407,8 +439,10 @@ int main(int argc, char **argv) {
     file.close();
 
     NODE* x = cities.search_node((double)8.3766667,(double)-78.9591667);
-    cout << endl << x->data->population << endl;
-    while(1){}
+    //cout << endl << x->data->population << endl;
+    //cout << endl << x->depth << endl;
+    //cout << cities._totalPoints;
+    //while(1){}
 
     return(0);
 
