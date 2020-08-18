@@ -2,11 +2,11 @@
 #define QUADRANT_H
 
 #include <bits/stdc++.h>
-#include "utils.h"
+#include "../utils.h"
 
 using namespace std;
 
-namespace dsa{
+namespace dsa {
 
 using zone_t = tuple<double, double, double, double>;
 
@@ -62,17 +62,6 @@ struct quadrant {
 				return NW;
 			else
 				return SW;
-
-		// if (px < cx)
-		// 	if (py < cy)
-		// 		return SW;
-		// 	else
-		// 		return NW;
-		// else
-		// 	if (py < cy)
-		// 		return SE;
-		// 	else
-		// 		return NE;
 	}
 
 	bool contains(point_t p) {

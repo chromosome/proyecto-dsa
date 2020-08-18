@@ -5,10 +5,14 @@
 
 using namespace std;
 
+namespace dsa {
+
 using point_t = tuple<double, double>;
 using key_t = tuple<long double, long double>;
 using val_t = tuple<string, string, string, string, int>;
 using data_t = pair<point_t, int>;
+using dist_t = tuple<double, double>;
+using quad_t = pair<point_t, dist_t>;
 
 pair<key_t, val_t> make_entry(vector<string> record) {
 	stringstream geopoint(record[7]);
@@ -150,5 +154,7 @@ ostream& operator << (ostream& out, const tuple<Args...>& value) {
 	out << ")";
 	return out;
 }
+
+} // namespace dsa
 
 #endif

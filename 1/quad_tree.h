@@ -2,7 +2,7 @@
 #define QUAD_TREE_H
 
 #include <bits/stdc++.h>
-#include "utils.h"
+#include "../utils.h"
 
 using namespace std;
 

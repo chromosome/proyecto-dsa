@@ -2,7 +2,7 @@
 #define NODE_H
 
 #include <bits/stdc++.h>
-#include "utils.h"
+#include "../utils.h"
 #include "quadrant.h"
 
 namespace dsa {

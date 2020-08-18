@@ -1,28 +1,17 @@
 #include <bits/stdc++.h>
 #include "utils.h"
-#include "quad_tree2.h"
+#include "3/quad_tree.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	// auto data = read_data("worldcitiespop_fixed.csv");
-	// auto data = read_data2("test.csv");
-
-	// dsa::quad_tree qtree(data);
-	// cout << qtree.size << endl;
-
-	// qtree.bfs();
-
-	// cin.get();
-	// qtree.print();
-
-	// auto v = qtree.find({40.920404, 39.19209})->val();
-	// cout << v << endl;
-
-	dsa::quad_tree qtree(read_data2("worldcitiespop_fixed.csv"));
-	// dsa::quad_tree qtree(read_data2("test.csv"));
+	// dsa::quad_tree qtree(read_data2("worldcitiespop_fixed.csv"));
+	dsa::quad_tree qtree(dsa::read_data2("test2.csv"));
 	cout << qtree.size() << endl;
+
+	// data_t* d = qtree.find({50.0, 29.0});
+	// cout << d->first << ": " << d->second << endl;
 
 	return 0;
 }
