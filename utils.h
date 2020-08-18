@@ -5,8 +5,10 @@
 
 using namespace std;
 
+using point_t = tuple<double, double>;
 using key_t = tuple<long double, long double>;
 using val_t = tuple<string, string, string, string, int>;
+using data_t = pair<point_t, int>;
 
 pair<key_t, val_t> make_entry(vector<string> record) {
 	stringstream geopoint(record[7]);
@@ -46,6 +48,81 @@ vector<pair<key_t, val_t>> read_data(string filename) {
 			record.push_back(field);
 
 		data.push_back(make_entry(record));
+	}
+
+	return data;
+}
+
+// data_t make_entry2(vector<string> record) {
+// 	stringstream geopoint(record[7]);
+// 	string latitude , longitude;
+// 	getline(geopoint, latitude , ',');
+// 	getline(geopoint, longitude, ',');
+
+// 	return	{	
+// 					  record[0],
+// 					  record[1],
+// 					  record[2],
+// 					  record[3],
+// 				stoi (record[4]),
+// 				stold(latitude ),
+// 				stold(longitude)
+// 			};
+// }
+
+// vector<data_t> read_data2(string filename) {
+// 	vector<data_t> data;
+
+// 	ifstream input(filename);
+// 	string line;
+
+// 	getline(input, line);
+// 	while (getline(input, line)) {
+// 		stringstream line_stream(line);
+// 		string field;
+
+// 		vector<string> record;
+// 		while (getline(line_stream, field, ';'))
+// 			record.push_back(field);
+
+// 		data.push_back(make_entry2(record));
+// 	}
+
+// 	return data;
+// }
+
+data_t make_entry2(vector<string> record) {
+	stringstream geopoint(record[7]);
+	string latitude , longitude;
+	getline(geopoint, latitude , ',');
+	getline(geopoint, longitude, ',');
+
+	return	make_pair<point_t, int>
+	(
+		{
+			stold(latitude ),
+			stold(longitude)
+		},
+			stoi (record[4])
+	);
+}
+
+vector<data_t> read_data2(string filename) {
+	vector<data_t> data;
+
+	ifstream input(filename);
+	string line;
+
+	getline(input, line);
+	while (getline(input, line)) {
+		stringstream line_stream(line);
+		string field;
+
+		vector<string> record;
+		while (getline(line_stream, field, ';'))
+			record.push_back(field);
+
+		data.push_back(make_entry2(record));
 	}
 
 	return data;
