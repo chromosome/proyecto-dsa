@@ -20,8 +20,8 @@ int main(int argc, char const *argv[])
 	// auto v = qtree.find({40.920404, 39.19209})->val();
 	// cout << v << endl;
 
-	// dsa::quad_tree qtree(read_data2("worldcitiespop_fixed.csv"));
-	dsa::quad_tree qtree(read_data2("test.csv"));
+	dsa::quad_tree qtree(read_data2("worldcitiespop_fixed.csv"));
+	// dsa::quad_tree qtree(read_data2("test.csv"));
 	cout << qtree.size() << endl;
 
 	return 0;

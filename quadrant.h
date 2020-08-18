@@ -1,5 +1,5 @@
-#ifndef QUADRANT
-#define QUADRANT
+#ifndef QUADRANT_H
+#define QUADRANT_H
 
 #include <bits/stdc++.h>
 #include "utils.h"
@@ -35,17 +35,17 @@ struct quadrant {
 	void subdivide_zone(quad_enum q) {
 		auto [cx, cy] = center;
 
-		double xf[4] = {0.5, -0.5,  0.5, -0.5};
-		double yf[4] = {0.5,  0.5, -0.5, -0.5};
+		double xf[4] = {1, -1,  1, -1};
+		double yf[4] = {1,  1, -1, -1};
 
-		xdist *= xf[q]; ydist *= yf[q];
+		xdist *= 0.5; ydist *= 0.5;
 
-		center = {cx + xdist, cy + ydist};
+		center = {cx + xf[q]*xdist, cy + yf[q]*ydist};
 	}
 
 	zone_t get_zone() {
 		auto [cx, cy] = center;
-		return { cx - xdist, cy + xdist, cy - ydist, cy + ydist };
+		return { cx - xdist, cx + xdist, cy - ydist, cy + ydist };
 	}
 
 	quad_enum get_quadrant_for(point_t p) {
@@ -62,6 +62,17 @@ struct quadrant {
 				return NW;
 			else
 				return SW;
+
+		// if (px < cx)
+		// 	if (py < cy)
+		// 		return SW;
+		// 	else
+		// 		return NW;
+		// else
+		// 	if (py < cy)
+		// 		return SE;
+		// 	else
+		// 		return NE;
 	}
 
 	bool contains(point_t p) {

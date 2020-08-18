@@ -30,12 +30,10 @@ struct node {
 	, quad  (_center, _xdist, _ydist)
 	{}
 
-	node(node* other_p) {
-		quad 		= other_p->quad;
-		children[0] = other_p->children[0];
-		children[1] = other_p->children[1];
-		children[2] = other_p->children[2];
-		children[3] = other_p->children[3];
+	node(quadrant _quad) 
+	: quad(_quad)
+	{
+		// quad 		= other_p->quad;
 	}
 	
 	~node() { 
@@ -48,12 +46,11 @@ struct node {
 	}
 
 	node* make_child(quadrant::quad_enum q, data_t* d) {
-		if (children[q] == nullptr) {
-			children[q] = new node(this);
-			children[q]->subdivide_quad(q);
-			children[q]->set_color(BLACK);
-			children[q]->set_data(d);
-		}
+		children[q] = new node(quad);
+		children[q]->subdivide_quad(q);
+		children[q]->set_color(BLACK);
+		children[q]->set_data(d);
+
 		return children[q];
 	}
 
