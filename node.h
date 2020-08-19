@@ -39,6 +39,14 @@ struct node {
 		return child[t];
 	}
 
+	node* make_child(quadrant::quad_enum t) {
+		// child[t] = new node(data, BLACK);
+		auto child = make_child(t, data);
+		make_grey();
+
+		return child;
+	}
+
 	void make_grey() {
 		clear_data();
 		set_color(GREY);

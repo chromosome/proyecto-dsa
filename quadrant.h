@@ -13,6 +13,7 @@ using zone_t = tuple<double, double, double, double>;
 
 enum quad_enum 
 {
+	NO_QUADRANT = -1,
 	NE,
 	NW,
 	SE,
