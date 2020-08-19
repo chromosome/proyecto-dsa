@@ -2,7 +2,7 @@
 #define QUADRANT_H
 
 #include <bits/stdc++.h>
-#include "../utils.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -18,6 +18,8 @@ enum quad_enum
 	SE,
 	SW
 };
+
+quad_enum quad_lookup[4] = {NE, NW, SE, SW};
 
 string quad_map[4] = {"NE", "NW", "SE", "SW"};
 
@@ -57,14 +59,24 @@ zone_t get_zone(quad_t q) {
 	return { cx - xd, cx + xd, cy - yd, cy + yd };
 }
 
-bool contains(quad_t q) {
+bool contains(point_t p, quad_t q) {
 	auto [xmin, xmax, ymin, ymax] = get_zone(q);
-	auto [px, py] = q.first;
+	auto [px, py] = p;
 
-	if (px > xmin && px < xmax && py > ymin && py < ymax)
+	if (px >= xmin && px <= xmax && py >= ymin && py <= ymax)
 		return true;
 	else
 		return false;
+}
+
+bool intersects(quad_t a, quad_t b) {
+	auto [axmin, axmax, aymin, aymax] = get_zone(a);
+	point_t ap[4] = {{axmin, axmax}, {axmin, aymin}, {axmax, aymin}, {axmax, aymax}};
+	for (auto p: ap)
+		if (quadrant::contains(p, b))
+			return true;
+
+	return false;
 }
 
 } // namespace quadrant

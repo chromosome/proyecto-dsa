@@ -1,8 +1,9 @@
 build/
 results/
+impls/
 *.csv
 *.docx
 *.exe
 *.png
-*.sublime-project
+# *.sublime-project
 *.sublime-workspace
