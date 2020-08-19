@@ -7,3 +7,4 @@ impls/
 *.png
 # *.sublime-project
 *.sublime-workspace
+*.o
