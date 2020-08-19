@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 #include "utils.h"
-#include "3/quad_tree.h"
+#include "quad_tree.h"
 
 using namespace std;
 
