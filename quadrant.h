@@ -70,11 +70,21 @@ bool contains(point_t p, quad_t q) {
 		return false;
 }
 
-bool intersects(quad_t a, quad_t b) {
-	auto [axmin, axmax, aymin, aymax] = get_zone(a);
-	point_t ap[4] = {{axmin, axmax}, {axmin, aymin}, {axmax, aymin}, {axmax, aymax}};
-	for (auto p: ap)
-		if (quadrant::contains(p, b))
+bool contains(quad_t q, quad_t z) {
+	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
+	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
+	for (auto p: qp)
+		if (!quadrant::contains(p, z))
+			return false;
+
+	return true;
+}
+
+bool intersects(quad_t q, quad_t z) {
+	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
+	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
+	for (auto p: qp)
+		if (quadrant::contains(p, z))
 			return true;
 
 	return false;
