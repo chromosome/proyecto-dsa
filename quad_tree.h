@@ -111,6 +111,22 @@ public:
 			f(current);
 	}
 
+	node* search_city(point_t p) {
+		node* current = root;
+		quad_t q = quad;
+
+		while ((current != nullptr) && current->get_color() == node::GREY) {
+			auto t = quadrant::quadrant_of(p, q.first);
+			q = quadrant::subdivide_zone(t, q);
+			current = current->get_child(t);
+		}
+
+		if (current != nullptr && p == current->get_point())
+			return current;
+
+		return nullptr;
+	}
+
 	int region_search(point_t p) {
 		return 0;
 	}
@@ -159,6 +175,7 @@ public:
 			// nodo blanco
 			if (child == nullptr) {
 				child = current->make_child(t, d);
+				child->set_father(current);
 
 				cout << "white: " << child->get_point() << endl;
 				cout << "quadrant: " << qs.first << endl;
@@ -179,6 +196,82 @@ public:
 		size_++;
 		return true;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+    bool remove(data_t* d){
+
+		point_t p = d->first;
+
+        node* current = search_city(p);
+        node* father = current->get_father();
+
+        // se comprueba la existencia de la ciudad
+        if(current == nullptr)
+            return false;
+
+        // si solo existia el nodo root se borran los datos del nodo y se retorna
+        if(current == root) {
+            delete current;
+            current = nullptr;
+            size_ -= 1;
+            return true;
+        }
+
+        // es necesaria una referencia directa al padre para evitar casos problematicos
+        // en que el nodo elimine referencias asi mismo usando current->father->{first,second,...}
+        father = current->get_father();
+
+        // se borran los datos del nodo y se reinicia
+        delete current;
+        current = nullptr;
+        size_ -= 1;
+
+        // se COMPACTA el arbol de forma iterativa
+        while(father != nullptr) {
+
+            // se cuentan los colores de los nodos hijos
+            int w = 0;
+            int g = 0;
+            int b = 0;
+
+            if(father->child[0] == nullptr ) w++;
+            else if(father->child[0]->get_color() == node::GREY ) g++;
+
+            if(father->child[1] == nullptr ) w++;
+            else if(father->child[1]->get_color() == node::GREY ) g++;
+
+            if(father->child[2] == nullptr ) w++;
+            else if(father->child[2]->get_color() == node::GREY ) g++;
+
+            if(father->child[3] == nullptr ) w++;
+            else if(father->child[3]->get_color() == node::GREY ) g++;
+
+            b = 4 - g - w;
+
+            // si solo quedan nodos blancos se eliminan y nodo padre se blanquea
+            if(w == 4){
+
+                current = father->get_father();
+                delete father;
+                father = current; // para siguiente iteracion
+
+            // si solo queda un nodo negro entonces reemplaza al nodo padre y se eliminan los hijos
+            } else if (b == 1 && w == 3) {
+
+                current = father->get_father();
+                delete father;
+                father = current; // para siguiente iteracion
+
+            // condicion de termino de compactacion (g >= 1 || b >= 2)
+            } else {
+                return false;
+            }
+        }
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
 
 	size_t size() {
 		return size_;
