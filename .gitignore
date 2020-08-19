@@ -5,3 +5,5 @@ results/
 *.sublime-project
 *.sublime-workspace
 *.exe
+*.o
+*.csv
