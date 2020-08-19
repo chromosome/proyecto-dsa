@@ -2,12 +2,31 @@
 #define QUAD_TREE_H
 
 #include <bits/stdc++.h>
-#include "node.h"
 #include "utils.h"
+#include "node.h"
+#include "quadrant.h"
 
 using namespace std;
 
 namespace dsa {
+
+using namespace quadrant;
+
+void debug(node* n, quad_t q, quad_enum t = NO_QUADRANT) {
+	if (n == nullptr)
+		cout << "white node" << endl;
+	else 
+		if (n->get_color() == node::GREY)
+			cout << "grey node" << endl;
+		else
+			cout << "black node" << endl;
+
+	if (t == NO_QUADRANT)
+		cout << "quadrant: " << q.first << endl;
+	else
+		cout << quad_map[t] << " quadrant: " << q.first << endl;
+}
+
 
 class quad_tree
 {
@@ -19,23 +38,22 @@ class quad_tree
 
 	node* root = nullptr;
 
-	quad_t subdivide(node* n, quad_t q) {
-		auto t = quadrant::quadrant_of(n->get_point(), q.first);
-		auto s = quadrant::subdivide_zone(t, q);
-		cout << quadrant::quad_map[t] << endl;
+	tuple<node*, quad_t, quad_enum> subdivide(node* n, quad_t q, point_t p) {
+		auto t = quadrant_of(p, q.first);
+		auto s = subdivide_zone(t, q);
 
-		node* child = n->make_child(t, n->get_data());
-		child->set_father(n);
-		n->make_grey();
-
-		cout << "subdivide: " << child->get_point() << endl;
-		cout << "quadrant: " << s.first << endl;
-		// cin.get();
-
-		return s;
+		return { n->get_child(t), s, t };
 	}
 
-public:
+	bool search(point_t p, function<void(node*)> f = nullptr) {
+		if (f == nullptr)
+			f = [](node* n){};
+
+		node* current = root;
+		quad_t q = quad;
+
+		while ((current != nullptr) && (current->get_color() == node::GREY)) {
+			f(current);
 
 	quad_tree(vector<data_t> _data)
 	: data(_data)
@@ -56,80 +74,95 @@ public:
 			auto [n, q] = Q.front();
 			Q.pop();
 
-			for (auto& t: quadrant::quad_lookup) {
+			// para cada nodo
+			for (auto& t: quad_lookup) {
 				auto c = n->get_child(t);
+
+				// si no es nodo blanco
 				if (c != nullptr) {
-					auto qs = quadrant::subdivide_zone(t, q);
-					if (quadrant::intersects(qs, z)) {
+
+					// obtiene su cuadrante
+					auto qs = subdivide_zone(t, q);
+
+					// si intersecta con el area de busqueda o el area de
+					// busqueda esta contenida en el cuadrante del nodo
+					if (intersects(qs, z) || intersects(z, qs)/*contains(z, qs)*/) {
+
+						// y si es nodo negro
 						if (c->get_color() == node::BLACK
-							&& quadrant::contains(c->get_point(), z)) {
-							cout << "aqui!" << endl;
+							&& contains(c->get_point(), z)) {
+
+							// se cuenta su poblacion
 							f(c);
 						}
+
+						// si es nodo gris se agrega a la fila
 						else
 							Q.push({n->get_child(t), qs});
-					}
-					else if (c->get_color() == node::BLACK
-							 && quadrant::contains(c->get_point(), z)) {
-						cout << "aqui2!" << endl;
-						f(c);
 					}
 				}
 			}
 		}
 	}
 
-	// template<func_t>
-	data_t* search(point_t p) {
-		node* current = root;
-		quad_t q = quad;
+public:
 
-		while ((current != nullptr) && current->get_color() == node::GREY) {
-			auto t = quadrant::quadrant_of(p, q.first);
-			q = quadrant::subdivide_zone(t, q);
-			current = current->get_child(t);
-		}
-
-		if (current != nullptr && p == current->get_point())
-			return current->get_data();
-
-		return nullptr;
+	quad_tree(vector<data_t> _data)
+	: data(_data) 
+	{
+		// cout << std::setprecision(std::numeric_limits<double>::digits10);
+		for (auto& record: data) 
+			insert(&record);
 	}
 
-	void search(point_t p, function<void(node*)> f) {
-		node* current = root;
-		quad_t q = quad;
-
-		while ((current != nullptr) && current->get_color() == node::GREY) {
-			f(current);
-			auto t = quadrant::quadrant_of(p, q.first);
-			q = quadrant::subdivide_zone(t, q);
-			current = current->get_child(t);
-		}
-
-		if (current != nullptr)
-			f(current);
+	data_t* find(point_t p) {
+		node* entry = nullptr;
+		auto func = 
+			[&entry, p] (node* n) {
+				if ((n->get_color() == node::BLACK) && (p == n->get_point()))
+					entry = n;
+			};
+		search(p, func);
+		if (entry != nullptr)
+			return entry->get_data();
+		else
+			return nullptr;
 	}
 
+	int depth(point_t p) {
+		int d = 0;
+		auto func = [&d] (node* n) { d++; };
+		search(p, func);
+		return d;
+	}
 
-	int region_search(point_t p) {
-		return 0;
+	long int region_search(quad_t q) {
+		long int total_population = 0;
+		auto func = 
+			[&total_population, q](dsa::node* n) { 
+					total_population += n->get_data()->second;
+			};
+		bfs(q, func);
+		return total_population;
 	}
 
 	bool insert(data_t* d) {
 		point_t p = d->first;
 		quad_t q = quad;
 		quad_t qs = quad;
-		cout << "[insert]: " << p << endl;
+		// cout << "[insert]: " << p << endl;
 
 		node* current = root;
-		node* child   = nullptr;
+		node* child   = current;
 
 		if (root == nullptr) {
 			root = new node(d, node::BLACK);
-			cout << "root: " << root->get_point() << endl;
-			cout << "quadrant: " << q.first << endl;
-			cout << "[done]" << endl << endl;
+
+			// cout << "root: ";
+			// debug(root, q, NO_QUADRANT);
+			// cout << "[inserting]: " << p << endl;
+			// cout << "[done]" << endl << endl;
+
 			size_++;
 			return true;
 		}
@@ -140,9 +173,14 @@ public:
             // si ya existe una ciudad en el mismo punto se detiene el insert
 			if (p == current->get_point())
 				return false;
-			else // subdivide para generar nodo hijo y volver al nodo current color gris
-				subdivide(current, q);
+			else {
+				auto [black, qb, tb] 
+					= subdivide(current, q, current->get_point());
+
+				black = current->make_child(tb);
+			}
 		}
+
 
 		child = current;
 
@@ -150,34 +188,35 @@ public:
 			current = child;
 			q = qs;
 
-			auto t = quadrant::quadrant_of(p, q.first);
-			qs = quadrant::subdivide_zone(t, q);
+			quad_enum t;
+			tie(child, qs, t) = subdivide(current, q, p);
 
-			child = current->get_child(t);
+			// cout << "current: ";
+			// debug(current, q, NO_QUADRANT);
 
-			cout << quadrant::quad_map[t] << endl;
+			// cout << "child: ";
+			// debug(child, qs, t);
+
+			// cout << endl;
 
 			// nodo blanco
 			if (child == nullptr) {
 				child = current->make_child(t, d);
-				child->set_father(current);
-
-				cout << "white: " << child->get_point() << endl;
-				cout << "quadrant: " << qs.first << endl;
-				// cin.get();
+				// cout << "[inserting]: " << p << endl;
 			}
 			else if (child->get_color() == node::BLACK) {
 				if (p == child->get_point())
 					return false;
 
-				cout << "black: " <<  child->get_point() << endl;
-				cout << "quadrant: " << qs.first << endl;
+				auto [black, qb, tb] = 
+					subdivide(child, qs, child->get_point());
 
-				subdivide(child, qs);
+				black = child->make_child(tb);
 			}
 		}
 
-		cout << "[done]" << endl << endl;
+		// cout << "[done]" << endl << endl;
+
 		size_++;
 		return true;
 	}
@@ -295,6 +334,6 @@ public:
 	}
 };
 
-}
+} // namespace dsa
 
 #endif

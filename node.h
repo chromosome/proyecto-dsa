@@ -40,6 +40,13 @@ struct node {
 		return child[t];
 	}
 
+	node* make_child(quadrant::quad_enum t) {
+		auto child = make_child(t, data);
+		make_grey();
+
+		return child;
+	}
+
 	void set_father(node* n) {
         father = n;
 	}
