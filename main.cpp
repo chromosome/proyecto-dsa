@@ -48,9 +48,9 @@ class PR_QUADTREE {
         ~PR_QUADTREE();
         void insert(double, double, CITY*);
         int remove(double, double);
-        int total_cities(double, double, int);
-        void total_population(double, double);
-        void total_population_region(double, double, int);
+        int total_population(double, double);
+        int total_cities_region(double, double, int);
+        int total_population_region(double, double, int);
         NODE* search_node(double, double);
         NODE* search_city(double, double);
 
@@ -414,21 +414,29 @@ int PR_QUADTREE::remove(double x, double y){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-int PR_QUADTREE::total_cities(double x, double y, int radius){
+// retorna la poblacion estimada de una ciudad (si ciudad no existe se considera poblacion estimada = 0)
+int PR_QUADTREE::total_population(double x, double y){
+
+    NODE* node = search_city(x,y);
+    if(node == NULL)
+        return(0);
+    else
+        return(node->data->population);
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+int PR_QUADTREE::total_cities_region(double x, double y, int radius){
 
     return(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void PR_QUADTREE::total_population(double x, double y){
+int PR_QUADTREE::total_population_region(double x, double y, int radius){
 
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-void PR_QUADTREE::total_population_region(double x, double y, int radius){
-
+    return(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
