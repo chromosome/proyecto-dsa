@@ -17,6 +17,7 @@ struct node {
 
 	data_t* data = nullptr;
 	node* child[4] = {nullptr, nullptr, nullptr, nullptr};
+	node* father = nullptr;
 	color_enum color = GREY;
 
 	node(data_t* _data = nullptr, color_enum _color = GREY)
@@ -37,6 +38,14 @@ struct node {
 		child[t] = new node(d, BLACK);
 
 		return child[t];
+	}
+
+	void set_father(node* n) {
+        father = n;
+	}
+
+	node* get_father(void) {
+        return father;
 	}
 
 	void make_grey() {

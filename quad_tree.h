@@ -25,6 +25,7 @@ class quad_tree
 		cout << quadrant::quad_map[t] << endl;
 
 		node* child = n->make_child(t, n->get_data());
+		child->set_father(n);
 		n->make_grey();
 
 		cout << "subdivide: " << child->get_point() << endl;
@@ -37,10 +38,10 @@ class quad_tree
 public:
 
 	quad_tree(vector<data_t> _data)
-	: data(_data) 
+	: data(_data)
 	{
 		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		for (auto& record: data) 
+		for (auto& record: data)
 			insert(&record);
 	}
 
@@ -132,12 +133,13 @@ public:
 			return true;
 		}
 
+		// si ya existe un punto en el cuadrante
 		if (current->get_color() == node::BLACK) {
-			current->get_color();
 
+            // si ya existe una ciudad en el mismo punto se detiene el insert
 			if (p == current->get_point())
 				return false;
-			else 
+			else // subdivide para generar nodo hijo y volver al nodo current color gris
 				subdivide(current, q);
 		}
 
@@ -182,7 +184,7 @@ public:
 		return size_;
 	}
 };
-	
+
 }
 
 #endif
