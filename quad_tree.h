@@ -15,7 +15,7 @@ using namespace quadrant;
 void debug(node* n, quad_t q, quad_enum t = NO_QUADRANT) {
 	if (n == nullptr)
 		cout << "white node" << endl;
-	else 
+	else
 		if (n->get_color() == node::GREY)
 			cout << "grey node" << endl;
 		else
@@ -55,12 +55,16 @@ class quad_tree
 		while ((current != nullptr) && (current->get_color() == node::GREY)) {
 			f(current);
 
-	quad_tree(vector<data_t> _data)
-	: data(_data)
-	{
-		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		for (auto& record: data)
-			insert(&record);
+            quad_enum t;
+            tie(current, q, t) = subdivide(current, q, p);
+        }
+
+        if (current != nullptr) {
+            f(current);
+            return true;
+        }
+        else
+            return false;
 	}
 
 	void bfs(quad_t z, function<void(node*)> f) {
@@ -108,16 +112,16 @@ class quad_tree
 public:
 
 	quad_tree(vector<data_t> _data)
-	: data(_data) 
+	: data(_data)
 	{
 		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		for (auto& record: data) 
+		for (auto& record: data)
 			insert(&record);
 	}
 
 	data_t* find(point_t p) {
 		node* entry = nullptr;
-		auto func = 
+		auto func =
 			[&entry, p] (node* n) {
 				if ((n->get_color() == node::BLACK) && (p == n->get_point()))
 					entry = n;
@@ -138,8 +142,8 @@ public:
 
 	long int region_search(quad_t q) {
 		long int total_population = 0;
-		auto func = 
-			[&total_population, q](dsa::node* n) { 
+		auto func =
+			[&total_population, q](dsa::node* n) {
 					total_population += n->get_data()->second;
 			};
 		bfs(q, func);
@@ -174,7 +178,7 @@ public:
 			if (p == current->get_point())
 				return false;
 			else {
-				auto [black, qb, tb] 
+				auto [black, qb, tb]
 					= subdivide(current, q, current->get_point());
 
 				black = current->make_child(tb);
@@ -208,7 +212,7 @@ public:
 				if (p == child->get_point())
 					return false;
 
-				auto [black, qb, tb] = 
+				auto [black, qb, tb] =
 					subdivide(child, qs, child->get_point());
 
 				black = child->make_child(tb);

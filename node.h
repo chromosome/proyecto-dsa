@@ -36,7 +36,7 @@ struct node {
 
 	node* make_child(quadrant::quad_enum t, data_t* d) {
 		child[t] = new node(d, BLACK);
-
+        child[t]->set_father(this);
 		return child[t];
 	}
 
