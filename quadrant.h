@@ -28,13 +28,13 @@ quad_enum quadrant_of(point_t p, point_t c) {
 	auto [px, py] = p;
 	auto [cx, cy] = c;
 
-	if (px >= cx)
-		if (py >= cy)
+	if (px > cx)
+		if (py > cy)
 			return NE;
 		else
 			return SE;
 	else
-		if (py >= cy)
+		if (py > cy)
 			return NW;
 		else
 			return SW;
