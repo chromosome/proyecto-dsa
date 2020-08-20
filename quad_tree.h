@@ -68,8 +68,10 @@ class quad_tree
 	}
 
 	void bfs(function<bool(node*, quad_t)> f) {
-		if (root != nullptr && root->get_color() == node::BLACK)
+		if (root != nullptr && root->get_color() == node::BLACK) 
 			f(root, origin);
+		else
+			return;
 
 		queue<tuple<node*, quad_t>> Q;
 		Q.push({root, origin});
@@ -218,7 +220,7 @@ public:
 		point_t p = d->first;
 		quad_t q = origin;
 		quad_t qs = origin;
-		cout << "[insert]: " << p << endl;
+		// cout << "[insert]: " << p << endl;
 
 		node* current = root;
 		node* child   = current;
@@ -226,10 +228,10 @@ public:
 		if (root == nullptr) {
 			root = new node(d, node::BLACK);
 
-			cout << "root: ";
-			debug(root, q, NO_QUADRANT);
-			cout << "[inserting]: " << p << endl;
-			cout << "[done]" << endl << endl;
+			// cout << "root: ";
+			// debug(root, q, NO_QUADRANT);
+			// cout << "[inserting]: " << p << endl;
+			// cout << "[done]" << endl << endl;
 
 			size_++;
 			return true;
@@ -259,18 +261,18 @@ public:
 			quad_enum t;
 			tie(child, qs, t) = subdivide(current, q, p);
 
-			cout << "current: ";
-			debug(current, q, NO_QUADRANT);
+			// cout << "current: ";
+			// debug(current, q, NO_QUADRANT);
 
-			cout << "child: ";
-			debug(child, qs, t);
+			// cout << "child: ";
+			// debug(child, qs, t);
 
-			cout << endl;
+			// cout << endl;
 
 			// nodo blanco
 			if (child == nullptr) {
 				child = current->make_child(t, d);
-				cout << "[inserting]: " << p << endl;
+				// cout << "[inserting]: " << p << endl;
 			}
 			else if (child->get_color() == node::BLACK) {
 				if (p == child->get_point())
@@ -283,7 +285,7 @@ public:
 			}
 		}
 
-		cout << "[done]" << endl << endl;
+		// cout << "[done]" << endl << endl;
 
 		size_++;
 		return true;
@@ -291,25 +293,9 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-	node* search_city(point_t p) {
-		node* current = root;
-		quad_t q = quad;
-
-		while ((current != nullptr) && current->get_color() == node::GREY) {
-			auto t = quadrant::quadrant_of(p, q.first);
-			q = quadrant::subdivide_zone(t, q);
-			current = current->get_child(t);
-		}
-
-		if (current != nullptr && p == current->get_point())
-			return current;
-
-		return nullptr;
-	}
-
     bool remove(point_t p){
 
-        node* temp = search_city(p);
+        node* temp = descend(p);
         node* father = temp->get_father();
         data_t* data;
         int index;
