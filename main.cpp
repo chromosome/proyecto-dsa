@@ -6,7 +6,7 @@ using namespace std;
 
 class CITY {
     public:
-        int population;
+        unsigned long long population;
         double geoPointX;
         double geoPointY;
 };
@@ -38,22 +38,20 @@ class PR_QUADTREE {
         double _y                       = -181.0; // minY = -179.983 maxY = 180
         double _w                       = 362.0;
         int _totalPoints                = 0;
-        unsigned int _totalPopulation   = 0;
+        unsigned long long _totalPopulation   = 0;
         int _maxDepth                   = 0;
 
         PR_QUADTREE();
         ~PR_QUADTREE();
         void insert(double, double, CITY*);
         int remove(double, double);
-        int total_population(double, double);
-        int total_cities_region(double, double, int);
-        int total_population_region(double, double, int);
+        unsigned long long total_population(double, double);
         NODE* search_node(double, double);
         NODE* search_city(double, double);
         int cities_in_region_driver(NODE*, double, double, double);
         int cities_in_region(double, double, double);
-        unsigned int population_in_region_driver(NODE*, double, double, double);
-        unsigned int population_in_region(double, double, double);
+        unsigned long long population_in_region_driver(NODE*, double, double, double);
+        unsigned long long population_in_region(double, double, double);
         bool collides(double, double, double, double, double, double);
 
 };
@@ -419,7 +417,7 @@ int PR_QUADTREE::remove(double x, double y){
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // retorna la poblacion estimada de una ciudad (si ciudad no existe se considera poblacion estimada = 0)
-int PR_QUADTREE::total_population(double x, double y){
+unsigned long long PR_QUADTREE::total_population(double x, double y){
 
     NODE* node = search_city(x,y);
     if(node == NULL)
@@ -485,7 +483,7 @@ int PR_QUADTREE::cities_in_region(double x, double y, double w){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
+unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -505,7 +503,7 @@ unsigned int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, dou
     // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
     } else if(node->color == 'g') {
 
-        int ctr = 0;
+        unsigned long long ctr = 0;
         if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
             ctr += population_in_region_driver(node->first,  rx, ry, rw);
 
@@ -523,7 +521,7 @@ unsigned int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, dou
     }
 }
 
-unsigned int PR_QUADTREE::population_in_region(double x, double y, double w){
+unsigned long long PR_QUADTREE::population_in_region(double x, double y, double w){
     return(population_in_region_driver(_root, x, y, w));
 }
 
@@ -533,7 +531,7 @@ unsigned int PR_QUADTREE::population_in_region(double x, double y, double w){
 int main(int argc, char **argv) {
 
     // lectura de datos
-    ifstream file;
+    fstream file;
     file.open("worldcitiespop_fixed.csv");
     //file.open("mini.csv");
     string line;
@@ -567,7 +565,7 @@ int main(int argc, char **argv) {
         //city->region = temp;
 
         getline(ss,word,';');
-        city->population = stod(word);
+        city->population = stoul(word);
 
         getline(ss,word,';');
         //city->latitude = stold(word);
@@ -613,6 +611,26 @@ int main(int argc, char **argv) {
     x = cities.search_city((double)8.3766667,(double)-78.9591667);
     if(x == NULL)
         cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
+
+    // datos de histograma para graficar
+    double sub = 25;
+    unsigned long long temp2 = 0, temp3 = 0;
+    file.open("histogram2D.txt");
+
+    for(int i=0; i<sub; i++){
+        for(int j=0; j<sub; j++){
+            temp2 = cities.cities_in_region( cities._x + i*cities._w/(sub),
+                                             cities._y + j*cities._w/(sub),
+                                             cities._w/(sub) );
+            cout << i << " " << j << " " << temp2 << endl;
+            file << i << " " << j << " " << temp2 << endl;
+            temp3 += temp2;
+            //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
+        }
+    }
+    file.close();
+    cout << endl << "total de poblacion por histograma " << sub << "x" << sub << " " << temp3 << endl << endl;
+
     //while(1){}
 
     return(0);
