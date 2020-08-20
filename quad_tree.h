@@ -34,7 +34,7 @@ class quad_tree
 
 	size_t size_ = 0;
 
-	const quad_t quad = { {.0, .0}, {90.0, 180.0} };
+	const quad_t origin = { {.0, .0}, {90.0, 180.0} };
 
 	node* root = nullptr;
 
@@ -50,7 +50,7 @@ class quad_tree
 			f = [](node* n){};
 
 		node* current = root;
-		quad_t q = quad;
+		quad_t q = origin;
 
 		while ((current != nullptr) && (current->get_color() == node::GREY)) {
 			f(current);
@@ -67,44 +67,23 @@ class quad_tree
 			return false;
 	}
 
-	void bfs(quad_t z, function<void(node*)> f) {
+	void bfs(function<bool(node*, quad_t)> f) {
 		if (root != nullptr && root->get_color() == node::BLACK)
-			f(root);
+			f(root, origin);
 
 		queue<tuple<node*, quad_t>> Q;
-		Q.push({root, quad});
+		Q.push({root, origin});
 
 		while(!Q.empty()) {
 			auto [n, q] = Q.front();
 			Q.pop();
 
-			// para cada nodo
 			for (auto& t: quad_lookup) {
 				auto c = n->get_child(t);
+				auto qs = subdivide_zone(t, q);
 
-				// si no es nodo blanco
-				if (c != nullptr) {
-
-					// obtiene su cuadrante
-					auto qs = subdivide_zone(t, q);
-
-					// si intersecta con el area de busqueda o el area de
-					// busqueda esta contenida en el cuadrante del nodo
-					if (intersects(qs, z) || intersects(z, qs)/*contains(z, qs)*/) {
-
-						// y si es nodo negro
-						if (c->get_color() == node::BLACK
-							&& contains(c->get_point(), z)) {
-
-							// se cuenta su poblacion
-							f(c);
-						}
-
-						// si es nodo gris se agrega a la fila
-						else
-							Q.push({n->get_child(t), qs});
-					}
-				}
+				if (f(c, qs))
+					Q.push({c, qs});
 			}
 		}
 	}
@@ -115,8 +94,9 @@ public:
 	: data(_data) 
 	{
 		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		for (auto& record: data) 
-			insert(&record);
+		for (auto& record: data)
+			if (insert(&record))
+				population += record.second;
 	}
 
 	data_t* find(point_t p) {
@@ -140,20 +120,72 @@ public:
 		return d;
 	}
 
-	long int region_search(quad_t q) {
+	long int get_total_population(quad_t z) {
 		long int total_population = 0;
 		auto func = 
-			[&total_population, q](dsa::node* n) { 
-					total_population += n->get_data()->second;
+			[&total_population, z] (node* n, quad_t q) { 
+				if (n != nullptr
+					&& (intersects(q, z) || intersects(z, q)/*contains(z, q)*/)) {
+
+					// y si es nodo negro
+					if (n->get_color() == node::BLACK
+						&& contains(n->get_point(), z)) {
+
+						// se cuenta su poblacion
+						total_population += n->get_data()->second;
+					}
+					return true;
+				}
+				return false;
 			};
-		bfs(q, func);
+		bfs(func);
 		return total_population;
+	}
+
+	long int get_total_cities(quad_t z) {
+		long int total_cities = 0;
+		auto func = 
+			[&total_cities, z] (node* n, quad_t q) { 
+				if (n != nullptr
+					&& (intersects(q, z) || intersects(z, q)/*contains(z, q)*/)) {
+
+					// y si es nodo negro
+					if (n->get_color() == node::BLACK
+						&& contains(n->get_point(), z)) {
+
+						// se cuenta su poblacion
+						total_cities++;
+					}
+					return true;
+				}
+				return false;
+			};
+		bfs(func);
+		return total_cities;
+	}
+
+	long int get_max_depth() {
+		double max_depth = 0;
+		auto func = 
+			[&max_depth, this] (node* n, quad_t q) { 
+				if (n != nullptr) {
+					if (n->get_color() == node::BLACK) {
+						double depth = log2(get<0>(origin.second)/get<0>(q.second));
+						max_depth = max_depth > depth ? max_depth : depth;
+						return false;
+					}
+					return true;
+				}
+				return false;
+			};
+		bfs(func);
+		return max_depth;
 	}
 
 	bool insert(data_t* d) {
 		point_t p = d->first;
-		quad_t q = quad;
-		quad_t qs = quad;
+		quad_t q = origin;
+		quad_t qs = origin;
 		// cout << "[insert]: " << p << endl;
 
 		node* current = root;

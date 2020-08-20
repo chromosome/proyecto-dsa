@@ -18,8 +18,8 @@ int main(int argc, char const *argv[])
 	cout << "inserted: " << qtree.size() << endl << endl;
 
 	// busqueda
-	point_t city = {50,29};
-	// point_t city = {50.523429, 29.461285};
+	// point_t city = {50,29};
+	point_t city = {50.523429, 29.461285};
 	data_t* d = qtree.find(city);
 	if (d)
 		cout << "search: " << d->first << ": " << d->second << endl << endl;
@@ -30,13 +30,15 @@ int main(int argc, char const *argv[])
 	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
 
 	// conteo
-	long int total_population = 0;
-	quad_t q = {{40, 40}, {2, 2}};
-	// quad_t q = {{0, 0}, {90, 180}};
+	// quad_t q = {{40, 40}, {5, 5}};
+	quad_t q = {{0, 0}, {90, 180}};
 	cout << dsa::quadrant::get_zone(q) << endl;
-	qtree.region_search(q);
 
-	cout << "total population: " << total_population << endl;
+	cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
+
+	cout << "total population: " << qtree.get_total_population(q) << endl << endl;
+
+	cout << "max depth: " << qtree.get_max_depth() << endl << endl;
 
 	return 0;
 }

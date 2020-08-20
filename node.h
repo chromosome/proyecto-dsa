@@ -23,11 +23,6 @@ struct node {
 	: data  (_data  )
 	, color (_color )
 	{}
-	
-	~node() { 
-		if (data != nullptr)
-			delete data; 
-	}
 
 	node* get_child(quadrant::quad_enum t) {
 		return child[t];
