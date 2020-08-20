@@ -9,8 +9,8 @@ using namespace quadrant;
 int main(int argc, char const *argv[])
 {
 	string filename;
-	if (argc > 1)
-		filename = argv[1];
+	if (argc > 0)
+		filename = "test2.csv";
 	else {
 		cout << "[Error] Debe ingresar un archivo de entrada" << endl;
 		return -1;
@@ -28,7 +28,7 @@ int main(int argc, char const *argv[])
 		cout << "found: " << d->first << ": " << d->second << endl << endl;
 	else
 		cout << "not found!" << endl << endl;
-	
+
 	// data_t* d = qtree.descend(city);
 	// if (d)
 	// 	cout << "found: " << d->first << ": " << d->second << endl << endl;

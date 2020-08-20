@@ -70,6 +70,8 @@ class quad_tree
 	void bfs(function<bool(node*, quad_t)> f) {
 		if (root != nullptr && root->get_color() == node::BLACK)
 			f(root, origin);
+        else
+            return;
 
 		queue<tuple<node*, quad_t>> Q;
 		Q.push({root, origin});
@@ -101,7 +103,7 @@ public:
 
 	data_t* find(point_t p) {
 		node* entry = nullptr;
-		auto func = 
+		auto func =
 			[&entry] (node* n, point_t p) {
 				if ((n->get_color() == node::BLACK) && (p == n->get_point()))
 					entry = n;
@@ -115,7 +117,7 @@ public:
 
 	node* descend(point_t p) {
 		node* m = nullptr;
-		auto func = 
+		auto func =
 			[&m] (node* n, point_t p) {
 				m = n;
 			};
@@ -132,8 +134,8 @@ public:
 
 	long int get_total_population(quad_t z) {
 		long int total_population = 0;
-		auto func = 
-			[&total_population, z] (node* n, quad_t q) { 
+		auto func =
+			[&total_population, z] (node* n, quad_t q) {
 				if (n != nullptr
 					&& (intersects(q, z) || intersects(z, q)/*contains(z, q)*/)) {
 
@@ -154,8 +156,8 @@ public:
 
 	long int get_total_cities(quad_t z) {
 		long int total_cities = 0;
-		auto func = 
-			[&total_cities, z] (node* n, quad_t q) { 
+		auto func =
+			[&total_cities, z] (node* n, quad_t q) {
 				if (n != nullptr
 					&& (intersects(q, z) || intersects(z, q)/*contains(z, q)*/)) {
 
@@ -176,8 +178,8 @@ public:
 
 	long int get_max_depth() {
 		double max_depth = 0;
-		auto func = 
-			[&max_depth, this] (node* n, quad_t q) { 
+		auto func =
+			[&max_depth, this] (node* n, quad_t q) {
 				if (n != nullptr) {
 					if (n->get_color() == node::BLACK) {
 						double depth = log2(get<0>(origin.second)/get<0>(q.second));
@@ -194,11 +196,11 @@ public:
 
 	map<size_t, size_t> get_depth_histogram() {
 		map<size_t, size_t> histogram;
-		auto func = 
-			[&histogram, this] (node* n, quad_t q) { 
+		auto func =
+			[&histogram, this] (node* n, quad_t q) {
 				if (n != nullptr) {
 					if (n->get_color() == node::BLACK) {
-						size_t depth = 
+						size_t depth =
 							log2(get<0>(origin.second)/get<0>(q.second));
 						if (histogram.find(depth) == end(histogram))
 							histogram[depth] = 1;
@@ -291,25 +293,9 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-	node* search_city(point_t p) {
-		node* current = root;
-		quad_t q = quad;
-
-		while ((current != nullptr) && current->get_color() == node::GREY) {
-			auto t = quadrant::quadrant_of(p, q.first);
-			q = quadrant::subdivide_zone(t, q);
-			current = current->get_child(t);
-		}
-
-		if (current != nullptr && p == current->get_point())
-			return current;
-
-		return nullptr;
-	}
-
     bool remove(point_t p){
 
-        node* temp = search_city(p);
+        node* temp = descend(p);
         node* father = temp->get_father();
         data_t* data;
         int index;
