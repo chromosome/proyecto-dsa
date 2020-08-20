@@ -49,8 +49,10 @@ class PR_QUADTREE {
         int total_population_region(double, double, int);
         NODE* search_node(double, double);
         NODE* search_city(double, double);
-        int points_in_region_driver(NODE*, double, double, double);
-        int points_in_region(double, double, double);
+        int cities_in_region_driver(NODE*, double, double, double);
+        int cities_in_region(double, double, double);
+        int population_in_region_driver(NODE*, double, double, double);
+        int population_in_region(double, double, double);
         bool collides(double, double, double, double, double, double);
 
 };
@@ -432,8 +434,9 @@ bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Bx, double By
         return(false);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PR_QUADTREE::points_in_region_driver(NODE* node, double rx, double ry, double rw){
+int PR_QUADTREE::cities_in_region_driver(NODE* node, double rx, double ry, double rw){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -455,39 +458,70 @@ int PR_QUADTREE::points_in_region_driver(NODE* node, double rx, double ry, doubl
 
         int ctr = 0;
         if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
-            ctr += points_in_region_driver(node->first,  rx, ry, rw);
+            ctr += cities_in_region_driver(node->first,  rx, ry, rw);
 
         if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
-            ctr += points_in_region_driver(node->second, rx, ry, rw);
+            ctr += cities_in_region_driver(node->second, rx, ry, rw);
 
         if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
-            ctr += points_in_region_driver(node->third,  rx, ry, rw);
+            ctr += cities_in_region_driver(node->third,  rx, ry, rw);
 
         if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
-            ctr += points_in_region_driver(node->fourth, rx, ry, rw);
+            ctr += cities_in_region_driver(node->fourth, rx, ry, rw);
 
         return(ctr);
 
     }
 }
 
-int PR_QUADTREE::points_in_region(double x, double y, double w){
-    return(points_in_region_driver(_root, x, y, w));
+int PR_QUADTREE::cities_in_region(double x, double y, double w){
+    return(cities_in_region_driver(_root, x, y, w));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-int PR_QUADTREE::total_cities_region(double x, double y, int radius){
+int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
 
-    return(0);
+    // si no existen puntos
+    if(node == NULL || node->color == 'w')
+        return(0);
+
+    // si hay un solo punto se comprueba su pertenencia a la region
+    if(node->color == 'b'){
+
+        double nx = node->data->geoPointX;
+        double ny = node->data->geoPointY;
+
+        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+           return(node->data->population);
+        else
+            return(0);
+
+    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    } else if(node->color == 'g') {
+
+        int ctr = 0;
+        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
+            ctr += population_in_region_driver(node->first,  rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
+            ctr += population_in_region_driver(node->second, rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
+            ctr += population_in_region_driver(node->third,  rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
+            ctr += population_in_region_driver(node->fourth, rx, ry, rw);
+
+        return(ctr);
+
+    }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-
-int PR_QUADTREE::total_population_region(double x, double y, int radius){
-
-    return(0);
+int PR_QUADTREE::population_in_region(double x, double y, double w){
+    return(population_in_region_driver(_root, x, y, w));
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -565,6 +599,9 @@ int main(int argc, char **argv) {
     if(x == NULL)
         cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
     //while(1){}
+
+    cout << "ciudades en region: " << cities.cities_in_region(50.0, 50.0, 0.2) << endl;
+    cout << "habitantes en region: " << cities.population_in_region(50.0, 50.0, 0.2) << endl;
 
     return(0);
 
