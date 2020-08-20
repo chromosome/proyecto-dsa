@@ -20,9 +20,9 @@ enum quad_enum
 	SW
 };
 
-quad_enum quad_lookup[4] = {NE, NW, SE, SW};
+quad_enum quad_lookup[5] = {NO_QUADRANT, NE, NW, SE, SW};
 
-string quad_map[4] = {"NE", "NW", "SE", "SW"};
+string quad_map[5] = {"NO_QUADRANT", "NE", "NW", "SE", "SW"};
 
 quad_enum quadrant_of(point_t p, point_t c) {
 	auto [px, py] = p;
@@ -80,12 +80,25 @@ bool contains(quad_t q, quad_t z) {
 	return true;
 }
 
+// bool intersects(quad_t q, quad_t z) {
+// 	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
+// 	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
+// 	for (auto p: qp)
+// 		if (quadrant::contains(p, z))
+// 			return true;
+
+// 	return false;
+// }
+
 bool intersects(quad_t q, quad_t z) {
-	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
-	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
-	for (auto p: qp)
-		if (quadrant::contains(p, z))
-			return true;
+	auto [qx, qy] = q.first;
+	auto [qxd, qyd] = q.second;
+	
+	auto [zx, zy] = z.first;
+	auto [zxd, zyd] = z.second;
+
+	if (((qxd + zxd) > fabs(qx - zx)) || ((qyd + zyd) > fabs(qy - zy)))
+		return true;
 
 	return false;
 }

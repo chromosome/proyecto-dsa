@@ -17,31 +17,24 @@ int main(int argc, char const *argv[])
 	}
 
 	// insercion --------------------------------------------------------------
-	dsa::quad_tree qtree(read_data(filename));
+	dsa::quad_tree qtree(180., 90., read_data(filename));
 	cout << "inserted: " << qtree.size() << endl << endl;
 
 	// busqueda ---------------------------------------------------------------
-	// point_t city = {50,29};
-	point_t city = {50.523429, 29.461285};
+	point_t city = {50,29};
+	// point_t city = {50.523429, 29.461285};
 	data_t* d = qtree.find(city);
 	if (d)
 		cout << "found: " << d->first << ": " << d->second << endl << endl;
 	else
 		cout << "not found!" << endl << endl;
-	
-	// data_t* d = qtree.descend(city);
-	// if (d)
-	// 	cout << "found: " << d->first << ": " << d->second << endl << endl;
-	// else
-	// 	cout << "not found!" << endl << endl;
-
 
 	// profundidad de un punto ------------------------------------------------
 	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
 
 	// conteo -----------------------------------------------------------------
-	// quad_t q = {{40, 40}, {5, 5}};
-	quad_t q = {{0, 0}, {90, 180}};
+	// quad_t q = {{40, 40}, {0.1, 0.1}};
+	quad_t q = {{0, 0}, {180, 90}};
 	cout << get_zone(q) << endl;
 
 	cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
