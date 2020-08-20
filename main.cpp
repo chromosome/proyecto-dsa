@@ -33,12 +33,13 @@ class PR_QUADTREE {
 
     public:
 
-        NODE* _root         = NULL;
-        double _x           = -181.0; // minX = -54.9333 maxX = 82.4833
-        double _y           = -181.0; // minY = -179.983 maxY = 180
-        double _w           = 362.0;
-        int _totalPoints    = 0;
-        int _maxDepth       = 0;
+        NODE* _root                     = NULL;
+        double _x                       = -181.0; // minX = -54.9333 maxX = 82.4833
+        double _y                       = -181.0; // minY = -179.983 maxY = 180
+        double _w                       = 362.0;
+        int _totalPoints                = 0;
+        unsigned int _totalPopulation   = 0;
+        int _maxDepth                   = 0;
 
         PR_QUADTREE();
         ~PR_QUADTREE();
@@ -51,8 +52,8 @@ class PR_QUADTREE {
         NODE* search_city(double, double);
         int cities_in_region_driver(NODE*, double, double, double);
         int cities_in_region(double, double, double);
-        int population_in_region_driver(NODE*, double, double, double);
-        int population_in_region(double, double, double);
+        unsigned int population_in_region_driver(NODE*, double, double, double);
+        unsigned int population_in_region(double, double, double);
         bool collides(double, double, double, double, double, double);
 
 };
@@ -152,6 +153,9 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
         delete city;
 
     } else {
+
+        // se aumenta la poblacion total del quadtree
+        _totalPopulation += city->population;
 
         // el cuadrante ya contiene un punto? es decir hay colision en el nodo?
 
@@ -352,6 +356,7 @@ int PR_QUADTREE::remove(double x, double y){
         return(-1);
 
     // se borran los datos del nodo y se reinicia
+    _totalPopulation -= node->data->population;
     delete node->data;
     node->data = NULL;
     node->color = 'w';
@@ -480,7 +485,7 @@ int PR_QUADTREE::cities_in_region(double x, double y, double w){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
+unsigned int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -518,7 +523,7 @@ int PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, d
     }
 }
 
-int PR_QUADTREE::population_in_region(double x, double y, double w){
+unsigned int PR_QUADTREE::population_in_region(double x, double y, double w){
     return(population_in_region_driver(_root, x, y, w));
 }
 
@@ -585,23 +590,30 @@ int main(int argc, char **argv) {
 
     file.close();
 
-    // pruebas!!!
+    // pruebas insert
     NODE* x = cities.search_node((double)8.3766667,(double)-78.9591667);
     if(x != NULL)
         cout << "existe la ciudad <8.3766667,-78.9591667>" << endl;
     cout << "poblacion ciudad <8.3766667,-78.9591667>: " << x->data->population << endl;
     cout << "profundidad nodo de ciudad <8.3766667,-78.9591667>: " << x->depth << endl;
     cout << "total de ciudades en quadtree: " << cities._totalPoints << endl;
+    cout << "total de habitantes en quadtree: " << cities._totalPopulation << endl;
     cout << "maxima profundidad de nodo en quadtree: " << cities._maxDepth << endl;
+
+    // pruebas region
+    double rx = 0.0;
+    double ry = 0.0;
+    double rw = 400.0;
+    cout << "busqueda por region -> ciudades en: " << cities.cities_in_region(rx, ry, rw) << endl;
+    cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw) << endl;
+
+    // pruebas remove
     if(cities.remove((double)8.3766667,(double)-78.9591667) == 0)
         cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
     x = cities.search_city((double)8.3766667,(double)-78.9591667);
     if(x == NULL)
         cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
     //while(1){}
-
-    cout << "ciudades en region: " << cities.cities_in_region(50.0, 50.0, 0.2) << endl;
-    cout << "habitantes en region: " << cities.population_in_region(50.0, 50.0, 0.2) << endl;
 
     return(0);
 
