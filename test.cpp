@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 	}
 
 	// insercion --------------------------------------------------------------
-	dsa::quad_tree qtree(read_data(filename));
+	dsa::quad_tree qtree(read_data(filename), 4, 4);
 	cout << "inserted: " << qtree.size() << endl << endl;
 
 	// busqueda ---------------------------------------------------------------
@@ -78,5 +78,4 @@ int main(int argc, char const *argv[])
 	else
 		cout << get_zone(z) << " no contiene a " << get_zone(x) << endl;
 
-	return 0;
 }
