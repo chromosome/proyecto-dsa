@@ -34,8 +34,8 @@ class PR_QUADTREE {
     public:
 
         NODE* _root         = NULL;
-        double _x           = -181.0;
-        double _y           = -181.0;
+        double _x           = -181.0; // minX = -54.9333 maxX = 82.4833
+        double _y           = -181.0; // minY = -179.983 maxY = 180
         double _w           = 362.0;
         int _totalPoints    = 0;
         int _maxDepth       = 0;
@@ -49,6 +49,9 @@ class PR_QUADTREE {
         int total_population_region(double, double, int);
         NODE* search_node(double, double);
         NODE* search_city(double, double);
+        int points_in_region_driver(NODE*, double, double, double);
+        int points_in_region(double, double, double);
+        bool collides(double, double, double, double, double, double);
 
 };
 
@@ -135,8 +138,6 @@ NODE* PR_QUADTREE::search_city(double x, double y){
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void PR_QUADTREE::insert(double x, double y, CITY* city){
-
-    double h = _w;
 
     // se prueba la preexistencia de una ciudad en el mismo punto (en ese caso se ignora)
     NODE* node = search_node(x,y);
@@ -424,6 +425,55 @@ int PR_QUADTREE::total_population(double x, double y){
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
+bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Bx, double By, double Bw){
+    if( ( abs(Ax-Bx) <= 2*(Aw+Bw) ) || ( abs(Ay-By) <= 2*(Aw+Bw) ) )
+        return(true);
+    else
+        return(false);
+}
+
+
+int PR_QUADTREE::points_in_region_driver(NODE* node, double rx, double ry, double rw){
+
+    // si no existen puntos
+    if(node == NULL || node->color == 'w')
+        return(0);
+
+    // si hay un solo punto se comprueba su pertenencia a la region
+    if(node->color == 'b'){
+
+        double nx = node->data->geoPointX;
+        double ny = node->data->geoPointY;
+
+        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+           return(1);
+        else
+            return(0);
+
+    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    } else if(node->color == 'g') {
+
+        int ctr = 0;
+        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
+            ctr += points_in_region_driver(node->first,  rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
+            ctr += points_in_region_driver(node->second, rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
+            ctr += points_in_region_driver(node->third,  rx, ry, rw);
+
+        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
+            ctr += points_in_region_driver(node->fourth, rx, ry, rw);
+
+        return(ctr);
+
+    }
+}
+
+int PR_QUADTREE::points_in_region(double x, double y, double w){
+    return(points_in_region_driver(_root, x, y, w));
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -453,7 +503,7 @@ int main(int argc, char **argv) {
     int ctr = 0;
 
     PR_QUADTREE cities;
-double minX = 0.0, minY = 0.0, maxX = 0.0, maxY = 0.0;
+
     getline(file,line);
     while(getline(file,line) && ctr < 3173647){
 
@@ -493,20 +543,12 @@ double minX = 0.0, minY = 0.0, maxX = 0.0, maxY = 0.0;
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
-        if(city->geoPointX < minX)
-            minX = city->geoPointX;
-        if(city->geoPointX > maxX)
-            maxX = city->geoPointX;
-        if(city->geoPointY < minY)
-            minY = city->geoPointY;
-        if(city->geoPointY > maxY)
-            maxY = city->geoPointY;
         cities.insert(city->geoPointX, city->geoPointY, city);
 
         ctr++;
 
     }
-cout << minX << " " << maxX << " " << minY << " " << maxY << endl << endl << endl;
+
     file.close();
 
     // pruebas!!!
