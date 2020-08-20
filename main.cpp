@@ -2,9 +2,7 @@
 #include <fstream>
 #include <sstream>
 
-
 using namespace std;
-
 
 class CITY {
     public:
@@ -12,7 +10,6 @@ class CITY {
         double geoPointX;
         double geoPointY;
 };
-
 
 class NODE {
     public:
@@ -31,7 +28,6 @@ class NODE {
         int count_colors(char);
 
 };
-
 
 class PR_QUADTREE {
 
@@ -62,7 +58,6 @@ PR_QUADTREE::PR_QUADTREE(){
     _root->y = _y;
     _root->w = _w;
 }
-
 
 PR_QUADTREE::~PR_QUADTREE(){}
 
@@ -407,9 +402,10 @@ int PR_QUADTREE::remove(double x, double y){
 
         // condicion de termino de compactacion (g >= 1 || b >= 2)
         } else {
-            return(0);
+            break;
         }
     }
+    return(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -457,7 +453,7 @@ int main(int argc, char **argv) {
     int ctr = 0;
 
     PR_QUADTREE cities;
-
+double minX = 0.0, minY = 0.0, maxX = 0.0, maxY = 0.0;
     getline(file,line);
     while(getline(file,line) && ctr < 3173647){
 
@@ -497,12 +493,20 @@ int main(int argc, char **argv) {
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
+        if(city->geoPointX < minX)
+            minX = city->geoPointX;
+        if(city->geoPointX > maxX)
+            maxX = city->geoPointX;
+        if(city->geoPointY < minY)
+            minY = city->geoPointY;
+        if(city->geoPointY > maxY)
+            maxY = city->geoPointY;
         cities.insert(city->geoPointX, city->geoPointY, city);
 
         ctr++;
 
     }
-
+cout << minX << " " << maxX << " " << minY << " " << maxY << endl << endl << endl;
     file.close();
 
     // pruebas!!!
