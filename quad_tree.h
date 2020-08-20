@@ -243,13 +243,12 @@ public:
 		return nullptr;
 	}
 
-    bool remove(data_t* d){
-
-		point_t p = d->first;
+    bool remove(point_t p){
 
         node* temp = search_city(p);
-        node* father;
+        node* father = temp->get_father();
         data_t* data;
+        int index;
 
         // se comprueba la existencia de la ciudad
         if(temp == nullptr)
@@ -257,8 +256,8 @@ public:
 
         // si solo existia el nodo root se borran los datos del nodo y se retorna
         if(temp == root) {
-            delete temp;
-            temp = nullptr;
+            delete root;
+            root = nullptr;
             size_ -= 1;
             return true;
         }
@@ -268,8 +267,12 @@ public:
         father = temp->get_father();
 
         // se borran los datos del nodo y se reinicia
-        delete temp;
-        temp = nullptr;
+        for(int i=0; i<4; i++){
+            if(temp == father->child[i])
+                index = i;
+        }
+        delete father->child[index];
+        father->child[index] = nullptr;
         size_ -= 1;
 
         // se COMPACTA el arbol de forma iterativa
@@ -298,13 +301,17 @@ public:
             if(w == 4){
 
                 temp = father->get_father();
-                delete father;
+
+                for(int i=0; i<4; i++){
+                    if(temp->child[i] == father)
+                        index = i;
+                }
+                delete temp->child[index];
+                temp->child[index] = nullptr;
                 father = temp; // para siguiente iteracion
 
             // si solo queda un nodo negro entonces reemplaza al nodo padre y se eliminan los hijos
             } else if (b == 1 && w == 3) {
-
-                int index;
 
                 if(father->child[0] != nullptr && father->child[0]->get_color() == node::BLACK)
                     index = 0;
@@ -318,16 +325,20 @@ public:
                 // se hace blanco el nodo hijo
                 data = father->child[index]->get_data();
                 delete father->child[index];
+                father->child[index] = nullptr;
 
-                // se mueven los datos del hijo al padre
+                // se mueven los datos del hijo al padre y se cambia de gris a negro
                 father->data = data;
+                father->set_color(node::BLACK);
                 father = father->get_father();// para siguiente iteracion
 
             // condicion de termino de compactacion (g >= 1 || b >= 2)
             } else {
-                return false;
+                break;
             }
         }
+
+        return true;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////

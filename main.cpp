@@ -7,44 +7,56 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
 	string filename;
-	if (argc > 1)
-		filename = argv[1];
-	else {
-		cout << "[Error] Debe ingresar un archivo de entrada" << endl;
-		return -1;
-	}
 
+    filename = "test2.csv";
 	dsa::quad_tree qtree(read_data(filename));
+
 	cout << "inserted: " << qtree.size() << endl << endl;
 
-	// busqueda ---------------------------------------------------------------
-	point_t city = {50,29};
-	// point_t city = {50.523429, 29.461285};
-	data_t* d = qtree.find(city);
-	if (d)
-		cout << "search: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
+    cout << endl;
 
-	// profundidad de un punto ------------------------------------------------
-	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.0, -80.0>" << ": " << qtree.depth({-80.0, -80.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
 
-	// conteo -----------------------------------------------------------------
-	long int total_population = 0;
-	quad_t q = {{40, 40}, {2, 2}};
-	// quad_t q = {{0, 0}, {90, 180}};
-	cout << dsa::quadrant::get_zone(q) << endl;
-	qtree.region_search(q);
-
-	cout << "total population: " << total_population << endl;
+	cout << endl;
 
 	// remove -----------------------------------------------------------------
-	data_t* city2 = new data_t({{25, 39}, 1240810});
-	if (qtree.insert(city2))
-		cout << "inserted:" << city2->first << endl;
+	if (qtree.remove({-80.0, -80.0}))
+		cout << "removed:" << "<-80.0, -80.0>" << endl << endl;
 
-	if (qtree.remove(city2))
-		cout << "removed:" << city2->first << endl;
+	if(qtree.find({-80.0, -80.0}) == nullptr)
+        cout << "fue eliminado" << endl << endl;
 
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+	// remove -----------------------------------------------------------------
+	if (qtree.remove({-10.0, -10.0}))
+		cout << "removed:" << "-10.0, -10.0" << endl << endl;
+
+	if(qtree.find({-10.0, -10.0}) == nullptr)
+        cout << "fue eliminado" << endl << endl;
+
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+	// remove -----------------------------------------------------------------
+	if (qtree.remove({10.0, 10.0}))
+		cout << "removed:" << "10.0, 10.0" << endl << endl;
+
+    // profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+/*
+*/
 	return 0;
 }
