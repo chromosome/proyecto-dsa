@@ -149,10 +149,15 @@ public:
 		node* entry = nullptr;
 		auto func = 
 		[&entry, p] (node* n) {
-			if ((n->get_color() == node::BLACK) && (p == n->get_point()))
+			if ((n->get_color() == node::BLACK) ) {
+				cout << p << ", " << n->get_point();
+
+				if  (p == n->get_point()) {
 				entry = n;
+			}
+			}
 		};
-			
+
 		search(p, func);
 		if (entry != nullptr)
 			return entry->get_data();
@@ -192,19 +197,38 @@ public:
 		return path;
 	}
 
+	/*  Region Search ---------------------------------------------------------
+	 */
+	// bool region_search(function<bool(node*, quad_t)> f) {
+	// 	auto func = 
+	// 	[] (node* n, quad_t q) {
+	// 		if ((n != nullptr) && intersects(q, z)) {
+
+	// 			if ((n->get_color() == node::BLACK)) {
+
+	// 				if (!f(n, q))
+	// 					return false;
+	// 			}
+	// 			return true;
+	// 		}
+	// 		return false;
+	// 	};
+	// }
+
 	/*  Get Total Population --------------------------------------------------
 	 */
 	unsigned long get_total_population(quad_t z) {
 		unsigned long total_population = 0;
+
 		auto func = 
 		[&total_population, z] (node* n, quad_t q) { 
 			if ((n != nullptr) && intersects(q, z)) {
-				// y si es nodo negro
+
 				if ((n->get_color() == node::BLACK)) {
-					if (contains(n->get_point(), z)) {
-						// se cuenta su poblacion
+
+					if (contains(n->get_point(), z))
 						total_population += n->get_data()->second;
-					}
+
 					return false;
 				}
 				return true;
@@ -219,15 +243,16 @@ public:
 	 */
 	unsigned long get_total_cities(quad_t z) {
 		unsigned long total_cities = 0;
+
 		auto func = 
 		[&total_cities, z] (node* n, quad_t q) { 
 			if ((n != nullptr) && intersects(q, z)) {
-				// y si es nodo negro
+
 				if ((n->get_color() == node::BLACK)) {
-					if (contains(n->get_point(), z)) {
-						// se cuenta su poblacion
+
+					if (contains(n->get_point(), z)) 
 						total_cities++;
-					}
+
 					return false;
 				}
 				return true;
@@ -247,7 +272,8 @@ public:
 		double max_depth = 0;
 		auto func = 
 		[&max_depth, z] (node* n, quad_t q) { 
-			if (n != nullptr) {
+			if (n != nullptr && intersects(q, z)) {
+
 				if (n->get_color() == node::BLACK) {
 
 					double depth = log2(get<0>(z.second)/get<0>(q.second))+1;
@@ -274,6 +300,7 @@ public:
 		auto func = 
 		[&histogram, z] (node* n, quad_t q) { 
 			if (n != nullptr && intersects(q, z)) {
+
 				if (n->get_color() == node::BLACK) {
 
 					size_t depth = log2(get<0>(z.second)/get<0>(q.second))+1;
@@ -282,6 +309,7 @@ public:
 						histogram[depth] = 1;
 					else
 						histogram[depth] += 1;
+
 					return false;
 				}
 				return true;
@@ -324,7 +352,7 @@ public:
 			data.push_back(d);
 			
 			auto& ref = data.back();
-			n->data = &ref;
+			n->set_data(&ref);
 
 			return true;
 		}

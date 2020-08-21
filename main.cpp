@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
 	// 	cout << k << ": " << v << endl;
 	// cout << endl;
 
-	qtree.get_histogram2d(5);
+	qtree.get_histogram2d(2);
 
 	// operaciones entre cuadrantes -------------------------------------------
 	dsa::quad_t z = {{0, 0}, {2, 2}};

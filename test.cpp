@@ -8,21 +8,25 @@ using namespace quadrant;
 
 int main(int argc, char const *argv[])
 {
-	// string filename;
-	// if (argc > 1)
-	// 	filename = argv[1];
-	// else {
-	// 	cout << "[Error] Debe ingresar un archivo de entrada" << endl;
-	// 	return -1;
-	// }
+	string filename;
+	if (argc > 1)
+		filename = argv[1];
+	else {
+		cout << "[Error] Debe ingresar un archivo de entrada" << endl;
+		return -1;
+	}
 
 	// insercion --------------------------------------------------------------
-	dsa::quad_tree qtree(4., 4.);
+	dsa::quad_tree qtree(4., 4., read_data(filename));
 
-	qtree.insert({{1., 3.}, 5000});
-	qtree.insert({{3.5, 3.5}, 5000});
-	qtree.insert({{2.25, 2.25}, 5000});
-	qtree.insert({{2.25, 2.75}, 5000});
+
+	// // insercion --------------------------------------------------------------
+	// dsa::quad_tree qtree(4., 4.);
+
+	// qtree.insert({{1., 3.}, 5000});
+	// qtree.insert({{3.5, 3.5}, 5000});
+	// qtree.insert({{2.25, 2.25}, 5000});
+	// qtree.insert({{2.25, 2.75}, 5000});
 
 	cout << "inserted: " << qtree.size() << endl << endl;
 
