@@ -51,6 +51,16 @@ vector<data_t> read_data(string filename) {
 
 } // namespace dsa
 
+void profile (function<void(void)> f) {
+	auto start = chrono::steady_clock::now();
+	f();
+	auto end = chrono::steady_clock::now();
+
+	cout << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6
+		 // << " ms"
+		 << endl;
+}
+
 template<typename T, unsigned N, unsigned Last>
 struct tuple_printer {
 	static void print (ostream& out, const T& value) {

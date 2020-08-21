@@ -143,25 +143,45 @@ class quad_tree
 		bfs(func);
 	}
 
+	/*  Region Search ---------------------------------------------------------
+	 */
+	void region_search_grey(quad_t z, function<void(node*, quad_t)> f) {
+		auto func = 
+			[z, &f] (node* n, quad_t q) {
+				if ((n != nullptr) && intersects(q, z)) {
+
+					if ((n->get_color() == node::BLACK)) {
+						return false;
+					}
+
+					f(n, q);
+					return true;
+				}
+				return false;
+			};
+
+		bfs(func);
+	}
+
 public:
 
 	/*  Constructor -----------------------------------------------------------
 	 */
-	quad_tree(double _lat = 90., double _lon = 180., vector<data_t> _data = {})
+	quad_tree(double _lat, double _lon, vector<data_t> _data = {})
 	: data(_data)
 	, origin({ {.0, .0}, {_lat, _lon} })
 	{
 		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		unsigned long long total_data = 0;
-		unsigned long long total_inserted = 0;
+		// unsigned long long total_data = 0;
+		// unsigned long long total_inserted = 0;
 		for (auto& record: data) {
 			if (insert(&record)) {
-				total_inserted += record.second;
+				// total_inserted += record.second;
 			}
-			total_data += record.second;
+			// total_data += record.second;
 		}
-		cout << "poblacion total insertados: " << total_inserted << endl;
-		cout << "poblacion total datos: " << total_data << endl;
+		// cout << "poblacion total insertados: " << total_inserted << endl;
+		// cout << "poblacion total datos: " << total_data << endl;
 	}
 
 	/*  Find ------------------------------------------------------------------
@@ -248,20 +268,21 @@ public:
 
 	/*  Get Max Depth ---------------------------------------------------------
 	 */
-	int get_max_depth(quad_t z = {}) {
+	size_t get_max_depth(quad_t z = {}) {
 		if (z == quad_t({}))
 			z = origin;
 
-		double max_depth = 0;
+		double max_depth = 0.;
 
 		auto func = 
 			[&max_depth, z] (node* n, quad_t q) { 
-				double depth = log2(get<0>(z.second)/get<0>(q.second));
 
-				max_depth = max_depth > depth ? max_depth : depth;
+				double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
+
+				max_depth = (max_depth > depth) ? max_depth : depth;
 			};
 
-		region_search(z, func);
+		region_search_grey(z, func);
 		return max_depth;
 	}
 
@@ -275,7 +296,7 @@ public:
 
 		auto func = 
 			[&histogram, z] (node* n, quad_t q) { 
-				size_t depth = log2(get<0>(z.second)/get<0>(q.second))+1;
+				size_t depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
 
 				if (histogram.find(depth) == end(histogram))
 					histogram[depth] = 1;
@@ -289,46 +310,53 @@ public:
 
 	/*  Get Histogram 2D ------------------------------------------------------
 	 */
-	unsigned** get_histogram2d(int r) {
-		auto [p, d] = origin;
-		auto [dx, dy] = d;
-		auto [dxr, dyr] = dist_t{dx/r, dy/r};
+	// vector<tuple<int, int, unsigned long>> get_histogram2d(int r) {
+	// 	auto [p, d] = origin;
+	// 	auto [dx, dy] = d;
+	// 	auto [dxr, dyr] = dist_t{dx/r, dy/r};
 
-		unsigned** histogram2d = new unsigned*[r];
-		for (int i = 0; i < r; ++i)
-			histogram2d[i] = new unsigned[r];
+	// 	for (int i = 0; i < r; ++i) {
+	// 		for (int j = 0; j < r; ++j) {
+	// 			quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
 
-		for (int i = 0; i < r; ++i) {
-			for (int j = 0; j < r; ++j) {
-				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
-
-				cout << i << "," << j << "," << get_total_cities(z) << endl;
-			}
-		}
-
-		return histogram2d;
-	}
+	// 			cout << i << "," << j << "," << get_total_cities(z) << endl;
+	// 		}
+	// 	}
+	// }
 
 	/*  Get Histogram 2D ------------------------------------------------------
 	 */
-	void get_histogram2d(int rx, int ry) {
+	vector<tuple<int, int, unsigned long>> get_histogram2d(int rx, int ry) {
 		auto [p, d] = origin;
 		auto [dx, dy] = d;
 		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
 
-		// unsigned** histogram2d = new unsigned*[rx];
-		// for (int i = 0; i < r; ++i)
-		// 	histogram2d[i] = new unsigned[ry];
+		vector<tuple<int, int, unsigned long>> hist;
 
 		for (int i = 0; i < rx; ++i) {
 			for (int j = 0; j < ry; ++j) {
 				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
-
-				cout << i << "," << j << "," << get_total_cities(z) << endl;
+				// cout << z << endl;
+				hist.push_back({i, j, get_max_depth(z)});
 			}
 		}
 
-		// return histogram2d;
+		return hist;
+	}
+
+	/*  In Order Walk --------------------------------------------------------
+	 */
+	void inorder_walk() {
+		inorder_walk(root);
+		cout << endl;
+	}
+
+	static void inorder_walk(node* n) {
+		cout << "(";
+		for (auto t: {NE, NW, SE, SW})
+			if (n->get_child(t) != nullptr)
+				inorder_walk(n->get_child(t));
+		cout << ")";
 	}
 
 	/*  Insert ----------------------------------------------------------------

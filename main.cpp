@@ -44,12 +44,12 @@ int main(int argc, char const *argv[])
 	cout << "max depth: " << qtree.get_max_depth() << endl << endl;
 
 	// histograma -------------------------------------------------------------
-	// auto h = qtree.get_depth_histogram();
-	// for (auto [k, v]: h)
-	// 	cout << k << ": " << v << endl;
-	// cout << endl;
+	auto h = qtree.get_depth_histogram();
+	for (auto [k, v]: h)
+		cout << k << ": " << v << endl;
+	cout << endl;
 
-	qtree.get_histogram2d(4);
+	// qtree.get_histogram2d(4);
 
 	// operaciones entre cuadrantes -------------------------------------------
 	dsa::quad_t z = {{0, 0}, {2, 2}};

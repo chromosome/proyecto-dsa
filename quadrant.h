@@ -77,7 +77,7 @@ bool intersects(quad_t q, quad_t z) {
 	auto [zx, zy] = z.first;
 	auto [zxd, zyd] = z.second;
 
-	if (((qxd + zxd) > abs(qx - zx)) || ((qyd + zyd) > abs(qy - zy)))
+	if (((qxd + zxd) > abs(qx - zx)) && ((qyd + zyd) > abs(qy - zy)))
 		return true;
 
 	return false;
