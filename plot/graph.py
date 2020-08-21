@@ -24,10 +24,20 @@ for line in dataFile:
 print(z)
 dataFile.close()
 
-plt.imshow(z)
-plt.xticks(range(len(x)), x)
-plt.yticks(range(len(y)), y)
+
+mat = np.array( z, dtype=np.uint8).reshape((25,25)).transpose()
+
+print(mat.shape)
+
+plt.imshow(mat, interpolation='none')
+
 plt.show()
+
+
+#plt.imshow(z)
+#plt.xticks(range(len(x)), x)
+#plt.yticks(range(len(y)), y)
+#plt.show()
 
 #-----------------------------------------------
 
