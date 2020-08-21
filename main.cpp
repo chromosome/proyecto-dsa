@@ -349,25 +349,27 @@ int NODE::count_colors(char x){
 int PR_QUADTREE::remove(double x, double y){
 
     NODE* node = search_city(x,y);
-    NODE* father = node->father;
+    NODE* father = NULL;
 
     // se comprueba la existencia de la ciudad
     if(node == NULL)
-        return(-1);
+        return(0);
 
     // se borran los datos del nodo y se reinicia
     _totalPopulation -= node->data->population;
-    delete node->data;
-    node->data = NULL;
-    node->color = 'w';
     _totalPoints -= 1;
+    node->color = 'w';
 
     // si solo existia el nodo root se retorna
-    if(node == _root)
+    if(node == _root){
+        node->data = NULL;
         return(0);
+    }
+
+    father = node->father;
 
     // se COMPACTA el arbol de forma iterativa
-    while(father != NULL) {
+    while(node != NULL && node->father != NULL) {
 
         // es necesaria una referencia directa al padre para evitar casos problematicos
         // en que el nodo elimine referencias asi mismo usando node->father->{first,second,...}
@@ -382,6 +384,7 @@ int PR_QUADTREE::remove(double x, double y){
         // si solo quedan nodos blancos se eliminan y nodo padre se blanquea
         if(w == 4){
 
+            node->data = NULL;
             delete father->first;
             delete father->second;
             delete father->third;
@@ -398,6 +401,7 @@ int PR_QUADTREE::remove(double x, double y){
 
             father->color = 'b';
             father->data = node->data;
+            node->data = NULL;
             delete father->first;
             delete father->second;
             delete father->third;
@@ -663,11 +667,15 @@ int main(int argc, char **argv) {
     cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw) << endl;
 
     // pruebas remove
-    //if(cities.remove((double)8.3766667,(double)-78.9591667) == 0)
-    //    cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
-    //x = cities.search_city((double)8.3766667,(double)-78.9591667);
-    //if(x == NULL)
-    //    cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
+
+    int flag = cities.remove((double)8.3766667,(double)-78.9591667);
+    if( flag == 0)
+        cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
+    else if(flag == -1)
+        cout << "ciudad <8.3766667,-78.9591667> no existe" << endl;
+    x = cities.search_city((double)8.3766667,(double)-78.9591667);
+    if(x == NULL)
+       cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
 
     // datos de histograma para graficar
     double sub = 3000;
