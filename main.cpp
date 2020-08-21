@@ -52,6 +52,8 @@ class PR_QUADTREE {
         int cities_in_region(double, double, double);
         unsigned long long population_in_region_driver(NODE*, double, double, double);
         unsigned long long population_in_region(double, double, double);
+        int depths_in_region_driver(NODE*, double, double, double);
+        int depths_in_region(double, double, double);
         bool collides(double, double, double, double, double, double);
 
 };
@@ -526,6 +528,61 @@ unsigned long long PR_QUADTREE::population_in_region(double x, double y, double 
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, double rw){
+
+    // si no existen puntos
+    if(node == NULL || node->color == 'w')
+        return(0);
+
+    // si hay un solo punto se comprueba su pertenencia a la region
+    if(node->color == 'b'){
+
+        double nx = node->data->geoPointX;
+        double ny = node->data->geoPointY;
+
+        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+           return(node->depth);
+        else
+            return(0);
+
+    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    } else if(node->color == 'g') {
+
+        int maxDepth = 0;
+        int temp = 0;
+
+        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
+            temp = depths_in_region_driver(node->first,  rx, ry, rw);
+            if(temp > maxDepth)
+                maxDepth = temp;
+
+        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
+            temp = depths_in_region_driver(node->second,  rx, ry, rw);
+            if(temp > maxDepth)
+                maxDepth = temp;
+
+        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
+            temp = depths_in_region_driver(node->third,  rx, ry, rw);
+            if(temp > maxDepth)
+                maxDepth = temp;
+
+        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
+            temp = depths_in_region_driver(node->fourth,  rx, ry, rw);
+            if(temp > maxDepth)
+                maxDepth = temp;
+
+        return(maxDepth);
+
+    }
+}
+
+int PR_QUADTREE::depths_in_region(double x, double y, double w){
+    return(depths_in_region_driver(_root, x, y, w));
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
@@ -613,13 +670,13 @@ int main(int argc, char **argv) {
         cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
 
     // datos de histograma para graficar
-    double sub = 25;
+    double sub = 100;
     unsigned long long temp2 = 0, temp3 = 0;
-    file.open("histogram2D.txt");
+    file.open("depthsPerRegion_100x100.txt");
 
     for(int i=0; i<sub; i++){
         for(int j=0; j<sub; j++){
-            temp2 = cities.cities_in_region( cities._x + i*cities._w/(sub),
+            temp2 = cities.depths_in_region( cities._x + i*cities._w/(sub),
                                              cities._y + j*cities._w/(sub),
                                              cities._w/(sub) );
             cout << i << " " << j << " " << temp2 << endl;
@@ -629,7 +686,7 @@ int main(int argc, char **argv) {
         }
     }
     file.close();
-    cout << endl << "total de poblacion por histograma " << sub << "x" << sub << " " << temp3 << endl << endl;
+    cout << endl << "histograma de maxima profundidad por region" << sub << "x" << sub << " " << temp3 << endl << endl;
 
     //while(1){}
 

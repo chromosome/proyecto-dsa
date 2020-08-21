@@ -9,7 +9,11 @@ import os
 #####################################################################
 #####################################################################
 
-dataFile = open("histogram2D.txt","r")
+#dataFile = open("citiesPerRegion_250x250.txt","r")
+#dataFile = open("populationPerRegion_100x100.txt","r")
+#dataFile = open("populationPerRegion_360x360.txt","r")
+#dataFile = open("depthsPerRegion_100x100.txt","r")
+dataFile = open("depthsPerRegion_1000x1000.txt","r")
 
 x = []
 y = []
@@ -21,23 +25,19 @@ for line in dataFile:
     y.append(int(words[1]))
     z.append(int(words[2]))
     #print(x,y,data)
-print(z)
+#print(z)
 dataFile.close()
 
 
-mat = np.array( z, dtype=np.uint8).reshape((25,25)).transpose()
+mat = np.array( z ).reshape((1000,1000))
 
 print(mat.shape)
 
-plt.imshow(mat, interpolation='none')
-
+plt.imshow(mat[::-1,:], interpolation='none')
+plt.colorbar()
 plt.show()
 
 
-#plt.imshow(z)
-#plt.xticks(range(len(x)), x)
-#plt.yticks(range(len(y)), y)
-#plt.show()
 
 #-----------------------------------------------
 
