@@ -623,7 +623,7 @@ int main(int argc, char **argv) {
                                              cities._y + j*cities._w/(sub),
                                              cities._w/(sub) );
             cout << i << " " << j << " " << temp2 << endl;
-            file << i << " " << j << " " << temp2 << endl;
+            file << i << "," << j << "," << temp2 << endl;
             temp3 += temp2;
             //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
         }
