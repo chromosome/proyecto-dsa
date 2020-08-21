@@ -70,26 +70,6 @@ bool contains(point_t p, quad_t q) {
 		return false;
 }
 
-bool contains(quad_t q, quad_t z) {
-	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
-	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
-	for (auto p: qp)
-		if (!quadrant::contains(p, z))
-			return false;
-
-	return true;
-}
-
-// bool intersects(quad_t q, quad_t z) {
-// 	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
-// 	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
-// 	for (auto p: qp)
-// 		if (quadrant::contains(p, z))
-// 			return true;
-
-// 	return false;
-// }
-
 bool intersects(quad_t q, quad_t z) {
 	auto [qx, qy] = q.first;
 	auto [qxd, qyd] = q.second;
@@ -97,7 +77,7 @@ bool intersects(quad_t q, quad_t z) {
 	auto [zx, zy] = z.first;
 	auto [zxd, zyd] = z.second;
 
-	if (((qxd + zxd) > fabs(qx - zx)) || ((qyd + zyd) > fabs(qy - zy)))
+	if (((qxd + zxd) > abs(qx - zx)) || ((qyd + zyd) > abs(qy - zy)))
 		return true;
 
 	return false;

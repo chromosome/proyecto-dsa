@@ -122,13 +122,34 @@ class quad_tree
 		}
 	}
 
+	/*  Region Search ---------------------------------------------------------
+	 */
+	void region_search(quad_t z, function<void(node*, quad_t)> f) {
+		auto func = 
+			[z, &f] (node* n, quad_t q) {
+				if ((n != nullptr) && intersects(q, z)) {
+
+					if ((n->get_color() == node::BLACK)) {
+
+						f(n, q);
+
+						return false;
+					}
+					return true;
+				}
+				return false;
+			};
+
+		bfs(func);
+	}
+
 public:
 
 	/*  Constructor -----------------------------------------------------------
 	 */
-	quad_tree(double _lat = 180., double _lon = 90., vector<data_t> _data = {})
+	quad_tree(double _lat = 90., double _lon = 180., vector<data_t> _data = {})
 	: data(_data)
-	, origin({ {.0, .0}, {_lon, _lat} })
+	, origin({ {.0, .0}, {_lat, _lon} })
 	{
 		// cout << std::setprecision(std::numeric_limits<double>::digits10);
 		unsigned long long total_data = 0;
@@ -148,15 +169,13 @@ public:
 	data_t* find(point_t p) {
 		node* entry = nullptr;
 		auto func = 
-		[&entry, p] (node* n) {
-			if ((n->get_color() == node::BLACK) ) {
-				cout << p << ", " << n->get_point();
+			[&entry, p] (node* n) {
+				if ((n->get_color() == node::BLACK) ) {
 
-				if  (p == n->get_point()) {
-				entry = n;
-			}
-			}
-		};
+					if  (p == n->get_point())
+						entry = n;
+				}
+			};
 
 		search(p, func);
 		if (entry != nullptr)
@@ -189,31 +208,13 @@ public:
 		vector<quad_enum> path;
 
 		auto func = 
-		[&path] (node* n, quad_enum t) { 
-			path.push_back(t);
-		};
+			[&path] (node* n, quad_enum t) { 
+				path.push_back(t);
+			};
 
 		search(p, func);
 		return path;
 	}
-
-	/*  Region Search ---------------------------------------------------------
-	 */
-	// bool region_search(function<bool(node*, quad_t)> f) {
-	// 	auto func = 
-	// 	[] (node* n, quad_t q) {
-	// 		if ((n != nullptr) && intersects(q, z)) {
-
-	// 			if ((n->get_color() == node::BLACK)) {
-
-	// 				if (!f(n, q))
-	// 					return false;
-	// 			}
-	// 			return true;
-	// 		}
-	// 		return false;
-	// 	};
-	// }
 
 	/*  Get Total Population --------------------------------------------------
 	 */
@@ -221,21 +222,12 @@ public:
 		unsigned long total_population = 0;
 
 		auto func = 
-		[&total_population, z] (node* n, quad_t q) { 
-			if ((n != nullptr) && intersects(q, z)) {
+			[&total_population, z] (node* n, quad_t q) { 
+				if (contains(n->get_point(), z))
+					total_population += n->get_data()->second;
+			};
 
-				if ((n->get_color() == node::BLACK)) {
-
-					if (contains(n->get_point(), z))
-						total_population += n->get_data()->second;
-
-					return false;
-				}
-				return true;
-			}
-			return false;
-		};
-		bfs(func);
+		region_search(z, func);
 		return total_population;
 	}
 
@@ -245,21 +237,12 @@ public:
 		unsigned long total_cities = 0;
 
 		auto func = 
-		[&total_cities, z] (node* n, quad_t q) { 
-			if ((n != nullptr) && intersects(q, z)) {
+			[&total_cities, z] (node* n, quad_t q) { 
+				if (contains(n->get_point(), z)) 
+					total_cities++;
+			};
 
-				if ((n->get_color() == node::BLACK)) {
-
-					if (contains(n->get_point(), z)) 
-						total_cities++;
-
-					return false;
-				}
-				return true;
-			}
-			return false;
-		};
-		bfs(func);
+		region_search(z, func);
 		return total_cities;
 	}
 
@@ -270,23 +253,15 @@ public:
 			z = origin;
 
 		double max_depth = 0;
+
 		auto func = 
-		[&max_depth, z] (node* n, quad_t q) { 
-			if (n != nullptr && intersects(q, z)) {
+			[&max_depth, z] (node* n, quad_t q) { 
+				double depth = log2(get<0>(z.second)/get<0>(q.second));
 
-				if (n->get_color() == node::BLACK) {
+				max_depth = max_depth > depth ? max_depth : depth;
+			};
 
-					double depth = log2(get<0>(z.second)/get<0>(q.second))+1;
-
-					max_depth = max_depth > depth ? max_depth : depth;
-
-					return false;
-				}
-				return true;
-			}
-			return false;
-		};
-		bfs(func);
+		region_search(z, func);
 		return max_depth;
 	}
 
@@ -297,27 +272,18 @@ public:
 			z = origin;
 
 		map<size_t, size_t> histogram;
+
 		auto func = 
-		[&histogram, z] (node* n, quad_t q) { 
-			if (n != nullptr && intersects(q, z)) {
+			[&histogram, z] (node* n, quad_t q) { 
+				size_t depth = log2(get<0>(z.second)/get<0>(q.second))+1;
 
-				if (n->get_color() == node::BLACK) {
+				if (histogram.find(depth) == end(histogram))
+					histogram[depth] = 1;
+				else
+					histogram[depth] += 1;
+			};
 
-					size_t depth = log2(get<0>(z.second)/get<0>(q.second))+1;
-
-					if (histogram.find(depth) == end(histogram))
-						histogram[depth] = 1;
-					else
-						histogram[depth] += 1;
-
-					return false;
-				}
-				return true;
-			}
-			return false;
-		};
-
-		bfs(func);
+		region_search(z, func);
 		return histogram;
 	}
 
@@ -336,12 +302,33 @@ public:
 			for (int j = 0; j < r; ++j) {
 				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
 
-				cout << get_max_depth(z) << endl;
+				cout << i << "," << j << "," << get_total_cities(z) << endl;
 			}
 		}
 
-
 		return histogram2d;
+	}
+
+	/*  Get Histogram 2D ------------------------------------------------------
+	 */
+	void get_histogram2d(int rx, int ry) {
+		auto [p, d] = origin;
+		auto [dx, dy] = d;
+		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
+
+		// unsigned** histogram2d = new unsigned*[rx];
+		// for (int i = 0; i < r; ++i)
+		// 	histogram2d[i] = new unsigned[ry];
+
+		for (int i = 0; i < rx; ++i) {
+			for (int j = 0; j < ry; ++j) {
+				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
+
+				cout << i << "," << j << "," << get_total_cities(z) << endl;
+			}
+		}
+
+		// return histogram2d;
 	}
 
 	/*  Insert ----------------------------------------------------------------
