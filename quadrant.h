@@ -13,28 +13,28 @@ using zone_t = tuple<double, double, double, double>;
 
 enum quad_enum 
 {
-	NO_QUADRANT = -1,
+	ORIGIN = -1,
 	NE,
 	NW,
 	SE,
 	SW
 };
 
-quad_enum quad_lookup[4] = {NE, NW, SE, SW};
+quad_enum quad_lookup[5] = {ORIGIN, NE, NW, SE, SW};
 
-string quad_map[4] = {"NE", "NW", "SE", "SW"};
+string quad_map[5] = {"ORIGIN", "NE", "NW", "SE", "SW"};
 
 quad_enum quadrant_of(point_t p, point_t c) {
 	auto [px, py] = p;
 	auto [cx, cy] = c;
 
-	if (px > cx)
-		if (py > cy)
+	if (px >= cx)
+		if (py >= cy)
 			return NE;
 		else
 			return SE;
 	else
-		if (py > cy)
+		if (py >= cy)
 			return NW;
 		else
 			return SW;
@@ -70,22 +70,15 @@ bool contains(point_t p, quad_t q) {
 		return false;
 }
 
-bool contains(quad_t q, quad_t z) {
-	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
-	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
-	for (auto p: qp)
-		if (!quadrant::contains(p, z))
-			return false;
-
-	return true;
-}
-
 bool intersects(quad_t q, quad_t z) {
-	auto [qxmin, qxmax, qymin, qymax] = get_zone(q);
-	point_t qp[4] = {{qxmin, qymin}, {qxmax, qymin}, {qxmin, qymax}, {qxmax, qymax}};
-	for (auto p: qp)
-		if (quadrant::contains(p, z))
-			return true;
+	auto [qx, qy] = q.first;
+	auto [qxd, qyd] = q.second;
+	
+	auto [zx, zy] = z.first;
+	auto [zxd, zyd] = z.second;
+
+	if (((qxd + zxd) > abs(qx - zx)) && ((qyd + zyd) > abs(qy - zy)))
+		return true;
 
 	return false;
 }

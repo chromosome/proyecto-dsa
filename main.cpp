@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 	}
 
 	// insercion --------------------------------------------------------------
-	dsa::quad_tree qtree(read_data(filename));
+	dsa::quad_tree qtree(90., 180., read_data(filename));
 	cout << "inserted: " << qtree.size() << endl << endl;
 
 	// busqueda ---------------------------------------------------------------
@@ -35,13 +35,12 @@ int main(int argc, char const *argv[])
 	// else
 	// 	cout << "not found!" << endl << endl;
 
-
 	// profundidad de un punto ------------------------------------------------
 	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
 
 	// conteo -----------------------------------------------------------------
-	// quad_t q = {{40, 40}, {5, 5}};
-	quad_t q = {{0, 0}, {90, 180}};
+	// dsa::quad_t q = {{40, 40}, {0.1, 0.1}};
+	dsa::quad_t q = {{0, 0}, {200, 200}};
 	cout << get_zone(q) << endl;
 
 	cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
@@ -56,9 +55,11 @@ int main(int argc, char const *argv[])
 		cout << k << ": " << v << endl;
 	cout << endl;
 
+	// qtree.get_histogram2d(4);
+
 	// operaciones entre cuadrantes -------------------------------------------
-	quad_t z = {{0, 0}, {2, 2}};
-	quad_t x = {{3, 3}, {2, 2}};
+	dsa::quad_t z = {{0, 0}, {2, 2}};
+	dsa::quad_t x = {{3, 3}, {2, 2}};
 
 	// interseccion
 	cout << get_zone(x) << " y " << get_zone(z) << " ";
@@ -73,7 +74,7 @@ int main(int argc, char const *argv[])
 	// x = {{0, 0}, {2, 2}};
 	// z = {{0, 0}, {1, 1}};
 
-	if (contains(x, z))
+	if (intersects(x, z))
 		cout << get_zone(z) << " contiene a " << get_zone(x) << endl;
 	else
 		cout << get_zone(z) << " no contiene a " << get_zone(x) << endl;
