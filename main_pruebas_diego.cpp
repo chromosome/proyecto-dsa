@@ -63,12 +63,12 @@ int main(int argc, char const *argv[])
 
     // se remueve p4 y se comprueba el estado del quadtree
     cout << "///////////////////////////////////////////" << endl;
-    qtree.remove(p4.first);
+    //qtree.remove(p4.first);
     cout << "total puntos en quadtree: " << qtree.size() << endl;
     cout << "depth p1: " << qtree.depth(p1.first) << endl;
     cout << "depth p2: " << qtree.depth(p2.first) << endl;
     cout << "depth p3: " << qtree.depth(p3.first) << endl;
-    //cout << "depth p4: " << qtree.depth(p4.first) << endl;
+    cout << "depth p4: " << qtree.depth(p4.first) << endl;
     cout << "depth p5: " << qtree.depth(p5.first) << endl;
 
     // se inserta p4 y se comprueba el estado del quadtree

@@ -125,7 +125,7 @@ class quad_tree
 	/*  Region Search ---------------------------------------------------------
 	 */
 	void region_search(quad_t z, function<void(node*, quad_t)> f) {
-		auto func = 
+		auto func =
 			[z, &f] (node* n, quad_t q) {
 				if ((n != nullptr) && intersects(q, z)) {
 
@@ -146,7 +146,7 @@ class quad_tree
 	/*  Region Search ---------------------------------------------------------
 	 */
 	void region_search_grey(quad_t z, function<void(node*, quad_t)> f) {
-		auto func = 
+		auto func =
 			[z, &f] (node* n, quad_t q) {
 				if ((n != nullptr) && intersects(q, z)) {
 
@@ -188,7 +188,7 @@ public:
 	 */
 	data_t* find(point_t p) {
 		node* entry = nullptr;
-		auto func = 
+		auto func =
 			[&entry, p] (node* n) {
 				if ((n->get_color() == node::BLACK) ) {
 
@@ -227,8 +227,8 @@ public:
 	vector<quad_enum> track(point_t p) {
 		vector<quad_enum> path;
 
-		auto func = 
-			[&path] (node* n, quad_enum t) { 
+		auto func =
+			[&path] (node* n, quad_enum t) {
 				path.push_back(t);
 			};
 
@@ -241,8 +241,8 @@ public:
 	unsigned long get_total_population(quad_t z) {
 		unsigned long total_population = 0;
 
-		auto func = 
-			[&total_population, z] (node* n, quad_t q) { 
+		auto func =
+			[&total_population, z] (node* n, quad_t q) {
 				if (contains(n->get_point(), z))
 					total_population += n->get_data()->second;
 			};
@@ -256,9 +256,9 @@ public:
 	unsigned long get_total_cities(quad_t z) {
 		unsigned long total_cities = 0;
 
-		auto func = 
-			[&total_cities, z] (node* n, quad_t q) { 
-				if (contains(n->get_point(), z)) 
+		auto func =
+			[&total_cities, z] (node* n, quad_t q) {
+				if (contains(n->get_point(), z))
 					total_cities++;
 			};
 
@@ -274,8 +274,8 @@ public:
 
 		double max_depth = 0.;
 
-		auto func = 
-			[&max_depth, z] (node* n, quad_t q) { 
+		auto func =
+			[&max_depth, z] (node* n, quad_t q) {
 
 				double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
 
@@ -294,8 +294,8 @@ public:
 
 		map<size_t, size_t> histogram;
 
-		auto func = 
-			[&histogram, z] (node* n, quad_t q) { 
+		auto func =
+			[&histogram, z] (node* n, quad_t q) {
 				size_t depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
 
 				if (histogram.find(depth) == end(histogram))
@@ -365,7 +365,7 @@ public:
 		node* n = nullptr;
 		if ((n = insert(&d)) != nullptr) {
 			data.push_back(d);
-			
+
 			auto& ref = data.back();
 			n->set_data(&ref);
 
