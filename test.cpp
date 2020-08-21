@@ -19,16 +19,16 @@ int main(int argc, char const *argv[])
 	// insercion --------------------------------------------------------------
 	dsa::quad_tree qtree(4., 4.);
 
-	qtree.insert({{1, 3}, 5000});
+	qtree.insert({{1., 3.}, 5000});
 	qtree.insert({{3.5, 3.5}, 5000});
-	qtree.insert({{2.125, 2.125}, 5000});
-	qtree.insert({{2.125, 2.375}, 5000});
+	qtree.insert({{2.25, 2.25}, 5000});
+	qtree.insert({{2.25, 2.75}, 5000});
 
 	cout << "inserted: " << qtree.size() << endl << endl;
 
 	// busqueda ---------------------------------------------------------------
 	// point_t city = {50,29};
-	point_t city = {2.125, 2.375};
+	point_t city = {1., 3.};
 	data_t* d = qtree.find(city);
 	if (d)
 		cout << "found: " << d->first << ": " << d->second << endl << endl;
@@ -44,12 +44,65 @@ int main(int argc, char const *argv[])
 	cout << endl << endl;
 
 
-	// // profundidad de un punto ------------------------------------------------
-	// cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
+	// profundidad de un punto ------------------------------------------------
+	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
+	// point_t city = {50,29};
+	city = {3.5, 3.5};
+	d = qtree.find(city);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+	
+	// tracking
+	path = qtree.track(city);
+
+	cout << "path: ";
+	for (const auto& p: path)
+		cout << quad_map[p+1] << " ";
+	cout << endl << endl;
+
+
+	// profundidad de un punto ------------------------------------------------
+	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
+	// point_t city = {50,29};
+	city = {2.25, 2.25};
+	d = qtree.find(city);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+	
+	// tracking
+	path = qtree.track(city);
+
+	cout << "path: ";
+	for (const auto& p: path)
+		cout << quad_map[p+1] << " ";
+	cout << endl << endl;
+
+
+	// profundidad de un punto ------------------------------------------------
+	cout << "depth of " << city << ": " << qtree.depth(city) << endl << endl;
+	// point_t city = {50,29};
+	city = {2.25, 2.75};
+	d = qtree.find(city);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+	
+	// tracking
+	path = qtree.track(city);
+
+	cout << "path: ";
+	for (const auto& p: path)
+		cout << quad_map[p+1] << " ";
+	cout << endl << endl;
 
 	// // conteo -----------------------------------------------------------------
-	// quad_t q = {{40, 40}, {5, 5}};
-	// // quad_t q = {{0, 0}, {90, 180}};
+	// dsa::quad_t q = {{40, 40}, {5, 5}};
+	// // dsa::quad_t q = {{0, 0}, {90, 180}};
 	// cout << get_zone(q) << endl;
 
 	// cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
@@ -65,8 +118,8 @@ int main(int argc, char const *argv[])
 	// cout << endl;
 
 	// operaciones entre cuadrantes -------------------------------------------
-	quad_t x = {{0, 0}, {2, 2}};
-	quad_t z = {{3, 3}, {2, 2}};
+	dsa::quad_t x = {{0, 0}, {2, 2}};
+	dsa::quad_t z = {{3, 3}, {2, 2}};
 
 	// interseccion
 	cout << get_zone(x) << " y " << get_zone(z) << " ";

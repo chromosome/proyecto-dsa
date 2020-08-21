@@ -13,28 +13,28 @@ using zone_t = tuple<double, double, double, double>;
 
 enum quad_enum 
 {
-	NO_QUADRANT = -1,
+	ORIGIN = -1,
 	NE,
 	NW,
 	SE,
 	SW
 };
 
-quad_enum quad_lookup[5] = {NO_QUADRANT, NE, NW, SE, SW};
+quad_enum quad_lookup[5] = {ORIGIN, NE, NW, SE, SW};
 
-string quad_map[5] = {"NO_QUADRANT", "NE", "NW", "SE", "SW"};
+string quad_map[5] = {"ORIGIN", "NE", "NW", "SE", "SW"};
 
 quad_enum quadrant_of(point_t p, point_t c) {
 	auto [px, py] = p;
 	auto [cx, cy] = c;
 
-	if (px > cx)
-		if (py > cy)
+	if (px >= cx)
+		if (py >= cy)
 			return NE;
 		else
 			return SE;
 	else
-		if (py > cy)
+		if (py >= cy)
 			return NW;
 		else
 			return SW;

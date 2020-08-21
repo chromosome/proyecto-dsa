@@ -5,12 +5,12 @@
 
 using namespace std;
 
-using point_t = tuple<double, double>;
-using data_t = pair<point_t, int>;
-using dist_t = tuple<double, double>;
-using quad_t = pair<point_t, dist_t>;
+namespace dsa {
 
-// namespace dsa {
+using point_t = tuple<double, double>;
+using data_t = pair<point_t, unsigned>;
+using dist_t = pair<double, double>;
+using quad_t = pair<point_t, dist_t>;
 
 data_t make_entry(vector<string> record) {
 	stringstream geopoint(record[7]);
@@ -24,7 +24,7 @@ data_t make_entry(vector<string> record) {
 			stold(latitude ),
 			stold(longitude)
 		},
-			stoi (record[4])
+			stoul(record[4])
 	);
 }
 
@@ -49,7 +49,7 @@ vector<data_t> read_data(string filename) {
 	return data;
 }
 
-// } // namespace dsa
+} // namespace dsa
 
 template<typename T, unsigned N, unsigned Last>
 struct tuple_printer {
@@ -66,12 +66,17 @@ struct tuple_printer <T, N, N> {
 	}
 };
 
-
 template<typename... Args>
 ostream& operator << (ostream& out, const tuple<Args...>& value) {
 	out << "(";
 	tuple_printer<tuple<Args...>, 0, sizeof...(Args)-1>::print(out, value);
 	out << ")";
+	return out;
+}
+
+template<typename F, typename S>
+ostream& operator << (ostream& out, const pair<F,S>& value) {
+	out << "(" << value.first << ", " << value.second << ")";
 	return out;
 }
 
