@@ -241,8 +241,8 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
 
                 // se crean los 4 nodos hijo
                 temp->first = new NODE;
-                temp->first->father = node;
-                temp->first->depth = node->depth + 1;
+                temp->first->father = temp;
+                temp->first->depth = temp->depth + 1;
                 temp->first->color = 'w';
                 temp->first->x = temp->x;
                 temp->first->y = temp->y + temp->w/2;
@@ -250,8 +250,8 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->first->w = temp->w/2;
 
                 temp->second = new NODE;
-                temp->second->father = node;
-                temp->second->depth = node->depth + 1;
+                temp->second->father = temp;
+                temp->second->depth = temp->depth + 1;
                 temp->second->color = 'w';
                 temp->second->x = temp->x + temp->w/2;
                 temp->second->y = temp->y + temp->w/2;
@@ -259,8 +259,8 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->second->w = temp->w/2;
 
                 temp->third = new NODE;
-                temp->third->father = node;
-                temp->third->depth = node->depth + 1;
+                temp->third->father = temp;
+                temp->third->depth = temp->depth + 1;
                 temp->third->color = 'w';
                 temp->third->x = temp->x;
                 temp->third->y = temp->y;
@@ -268,8 +268,8 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->third->w = temp->w/2;
 
                 temp->fourth = new NODE;
-                temp->fourth->father = node;
-                temp->fourth->depth = node->depth + 1;
+                temp->fourth->father = temp;
+                temp->fourth->depth = temp->depth + 1;
                 temp->fourth->color = 'w';
                 temp->fourth->x = temp->x + temp->w/2;
                 temp->fourth->y = temp->y;
@@ -277,8 +277,8 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->w = temp->w/2;
 
                 // se actualiza el contador de maxima profundidad del quadtree :p
-                if(_maxDepth < node->depth + 1)
-                    _maxDepth = node->depth + 1;
+                if(_maxDepth < temp->depth + 1)
+                    _maxDepth = temp->depth + 1;
 
                 // condicion de termino para creacion de subnodos
                 if(cuadrante1 != cuadrante2){
@@ -433,7 +433,7 @@ unsigned long long PR_QUADTREE::total_population(double x, double y){
 
 
 bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Bx, double By, double Bw){
-    if( ( abs(Ax-Bx) <= 2*(Aw+Bw) ) || ( abs(Ay-By) <= 2*(Aw+Bw) ) )
+    if( ( abs(Ax-Bx) <= 2*(Aw+Bw) ) && ( abs(Ay-By) <= 2*(Aw+Bw) ) )
         return(true);
     else
         return(false);
@@ -663,27 +663,28 @@ int main(int argc, char **argv) {
     cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw) << endl;
 
     // pruebas remove
-    if(cities.remove((double)8.3766667,(double)-78.9591667) == 0)
-        cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
-    x = cities.search_city((double)8.3766667,(double)-78.9591667);
-    if(x == NULL)
-        cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
+    //if(cities.remove((double)8.3766667,(double)-78.9591667) == 0)
+    //    cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
+    //x = cities.search_city((double)8.3766667,(double)-78.9591667);
+    //if(x == NULL)
+    //    cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
 
     // datos de histograma para graficar
-    double sub = 100;
+    double sub = 3000;
     unsigned long long temp2 = 0, temp3 = 0;
-    file.open("depthsPerRegion_100x100.txt");
+    file.open("depthsPerRegion_3000x3000.txt");
 
     for(int i=0; i<sub; i++){
         for(int j=0; j<sub; j++){
             temp2 = cities.depths_in_region( cities._x + i*cities._w/(sub),
                                              cities._y + j*cities._w/(sub),
                                              cities._w/(sub) );
-            cout << i << " " << j << " " << temp2 << endl;
+
             file << i << "," << j << "," << temp2 << endl;
             temp3 += temp2;
             //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
         }
+        cout << i << " " << " " << temp2 << endl;
     }
     file.close();
     cout << endl << "histograma de maxima profundidad por region" << sub << "x" << sub << " " << temp3 << endl << endl;
