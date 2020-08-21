@@ -34,9 +34,9 @@ class PR_QUADTREE {
     public:
 
         NODE* _root                     = NULL;
-        double _x                       = -181.0; // minX = -54.9333 maxX = 82.4833
-        double _y                       = -181.0; // minY = -179.983 maxY = 180
-        double _w                       = 362.0;
+        double _x                       = -256.0; // minX = -54.9333 maxX = 82.4833
+        double _y                       = -256.0; // minY = -179.983 maxY = 180
+        double _w                       = 512.0;
         int _totalPoints                = 0;
         unsigned long long _totalPopulation   = 0;
         int _maxDepth                   = 0;
