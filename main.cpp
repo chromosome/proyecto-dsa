@@ -64,7 +64,7 @@ class PR_QUADTREE {
 
 };
 
-PR_QUADTREE::PR_QUADTREE(double x = -256, double y = -256, double w = 512, double h = 512){
+PR_QUADTREE::PR_QUADTREE(double x = -90.01, double y = -180.01, double w = 180.02, double h = 360.02){
     _x = x;
     _y = y;
     _w = w;
@@ -881,16 +881,17 @@ int main(int argc, char **argv) {
        cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
 
     // datos de histograma para graficar
-    double sub = 3000;
+    double subX = 180;
+    double subY = 360;
     unsigned long long temp2 = 0, temp3 = 0;
-    file.open("depthsPerRegion_3000x3000.txt");
+    file.open("depthsPerRegion_180x360.txt");
 
-    for(int i=0; i<sub; i++){
-        for(int j=0; j<sub; j++){
-            temp2 = cities.depths_in_region( cities._x + i*cities._w/(sub),
-                                             cities._y + j*cities._h/(sub),
-                                             cities._w/(sub),
-                                             cities._h/(sub) );
+    for(int i=0; i<subX; i++){
+        for(int j=0; j<subY; j++){
+            temp2 = cities.depths_in_region( cities._x + i*cities._w/(subX),
+                                             cities._y + j*cities._h/(subY),
+                                             cities._w/(subX),
+                                             cities._h/(subY) );
 
             file << i << "," << j << "," << temp2 << endl;
             temp3 += temp2;
@@ -899,7 +900,7 @@ int main(int argc, char **argv) {
         cout << i << " " << " " << temp2 << endl;
     }
     file.close();
-    cout << endl << "histograma de maxima profundidad por region" << sub << "x" << sub << " " << temp3 << endl << endl;
+    cout << endl << "histograma de maxima profundidad por region" << subX << "x" << subY << " " << temp3 << endl << endl;
 
     //while(1){}
 
