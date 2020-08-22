@@ -1,6 +1,5 @@
 build/
 results/
-*.png
 *.sublime-project
 *.sublime-workspace
 *.exe
