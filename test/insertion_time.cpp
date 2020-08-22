@@ -24,6 +24,15 @@ void insertion_time(string filename) {
 	}
 }
 
+void insertion_time2(string filename) {
+	quad_tree tree(90.0, 180.0);
+
+	auto data = read_data(filename);
+
+	for (const auto& record: data)
+		profile([&tree, record] { tree.insert(record); });
+}
+
 int main(int argc, char const *argv[])
 {
 	string filename;
@@ -34,7 +43,7 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	insertion_time(filename);
+	insertion_time2(filename);
 
 	return 0;
 }
