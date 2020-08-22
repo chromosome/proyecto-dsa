@@ -39,10 +39,10 @@ class PR_QUADTREE {
     public:
 
         NODE* _root                             = NULL;
-        double _x                               = -256.0; // minX = -54.9333 maxX = 82.4833
-        double _y                               = -256.0; // minY = -179.983 maxY = 180
-        double _w                               =  512.0;
-        double _h                               =  512.0;
+        double _x;                              // minX = -54.9333 maxX = 82.4833
+        double _y;                              // minY = -179.983 maxY = 180
+        double _w;
+        double _h;
         int _totalPoints                        =  0;
         unsigned long long _totalPopulation     =  0;
         int _maxDepth                           =  0;
@@ -64,7 +64,10 @@ class PR_QUADTREE {
 
 };
 
-PR_QUADTREE::PR_QUADTREE(double x = -90.01, double y = -180.01, double w = 180.02, double h = 360.02){
+PR_QUADTREE::PR_QUADTREE(double x =  -90.01,
+                         double y = -180.01,
+                         double w =  180.02,
+                         double h =  360.02){
     _x = x;
     _y = y;
     _w = w;
