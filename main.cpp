@@ -45,7 +45,6 @@ class PR_QUADTREE {
         double _h;
         int _totalPoints                        =  0;
         unsigned long long _totalPopulation     =  0;
-        int _maxDepth                           =  0;
 
         PR_QUADTREE(double, double, double, double);
         ~PR_QUADTREE();
@@ -61,6 +60,7 @@ class PR_QUADTREE {
         int depths_in_region_driver(NODE*, double, double, double, double);
         int depths_in_region(double, double, double, double);
         bool collides(double, double, double, double, double, double, double, double);
+        int get_max_depth(void);
 
 };
 
@@ -292,10 +292,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->y = temp->y;
                 temp->fourth->w = temp->w/2;
                 temp->fourth->h = temp->h/2;
-
-                // se actualiza el contador de maxima profundidad del quadtree? :p
-                if(_maxDepth < temp->depth + 1)
-                    _maxDepth = temp->depth + 1;
 
                 // condicion de termino para creacion de subnodos
                 // cuando ambos puntos no estan en el mismo cuadrante
@@ -557,6 +553,10 @@ unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double r
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+int PR_QUADTREE::get_max_depth(void){
+    return(depths_in_region(_x, _y, _w*1000, _h*1000));
+}
+
 // devuelve las profundidades máximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
 int PR_QUADTREE::depths_in_region(double x, double y, double w, double h){
     return(depths_in_region_driver(_root, x, y, w, h));
@@ -789,11 +789,6 @@ int main(int argc, char **argv) {
 
 
 
-
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
     // lectura de datos
@@ -862,7 +857,7 @@ int main(int argc, char **argv) {
     cout << "profundidad nodo de ciudad <8.3766667,-78.9591667>: " << x->depth << endl;
     cout << "total de ciudades en quadtree: " << cities._totalPoints << endl;
     cout << "total de habitantes en quadtree: " << cities._totalPopulation << endl;
-    cout << "maxima profundidad de nodo en quadtree: " << cities._maxDepth << endl;
+    cout << "maxima profundidad de nodo en quadtree: " << cities.get_max_depth() << endl;
 
     // pruebas region
     double rx = 0.0;
@@ -883,6 +878,7 @@ int main(int argc, char **argv) {
     if(x == NULL)
        cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
 
+/*
     // datos de histograma para graficar
     double subX = 180;
     double subY = 360;
@@ -904,7 +900,7 @@ int main(int argc, char **argv) {
     }
     file.close();
     cout << endl << "histograma de maxima profundidad por region" << subX << "x" << subY << " " << temp3 << endl << endl;
-
+*/
     //while(1){}
 
     return(0);

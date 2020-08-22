@@ -65,10 +65,10 @@ class PR_QUADTREE {
 
 };
 
-PR_QUADTREE::PR_QUADTREE(double x =  -90.01,
-                         double y = -180.01,
-                         double w =  180.02,
-                         double h =  360.02){
+PR_QUADTREE::PR_QUADTREE(double x = -100000000.01,
+                         double y = -100000000.01,
+                         double w =  200000000.02,
+                         double h =  200000000.02){
     _x = x;
     _y = y;
     _w = w;
@@ -629,12 +629,14 @@ int main(int argc, char **argv) {
     fstream file;
     fstream file2;
     file.open("worldcitiespop_fixed.csv");
-    file2.open("tiempos_insercion.txt");
+    file2.open("insertion_time.dat");
+
     //file.open("mini.csv");
     string line;
     string word;
     string temp;
     int ctr = 0;
+
 
     PR_QUADTREE cities;
 
@@ -680,11 +682,13 @@ int main(int argc, char **argv) {
         auto start = chrono::steady_clock::now();
         cities.insert(city->geoPointX, city->geoPointY, city);
         auto end = chrono::steady_clock::now();
-        file2 << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6 << endl;
+        file2 << std::setprecision(10) << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6 << endl;
 
         ctr++;
 
     }
+
+    cout << cities._maxDepth << endl;
 
     file.close();
     file2.close();
