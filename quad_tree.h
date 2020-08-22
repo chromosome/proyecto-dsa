@@ -30,7 +30,7 @@ void debug(node* n, quad_t q, quad_enum t = ORIGIN) {
 
 class quad_tree
 {
-	vector<data_t> data;
+	list<data_t> data;
 
 	size_t size_ = 0;
 
@@ -167,7 +167,7 @@ public:
 
 	/*  Constructor -----------------------------------------------------------
 	 */
-	quad_tree(double _lat, double _lon, vector<data_t> _data = {})
+	quad_tree(double _lat, double _lon, list<data_t> _data = {})
 	: data(_data)
 	, origin({ {.0, .0}, {_lat, _lon} })
 	{
