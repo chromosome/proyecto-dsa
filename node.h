@@ -15,12 +15,12 @@ struct node {
 		BLACK
 	};
 
-	data_t* data = nullptr;
+	data_t data = {};
 	node* child[4] = {nullptr, nullptr, nullptr, nullptr};
 	node* father = nullptr;
 	color_enum color = GREY;
 
-	node(data_t* _data = nullptr, color_enum _color = GREY)
+	node(data_t _data = {}, color_enum _color = GREY)
 	: data  (_data  )
 	, color (_color )
 	{}
@@ -31,7 +31,7 @@ struct node {
 		return child[t];
 	}
 
-	node* make_child(quadrant::quad_enum t, data_t* d) {
+	node* make_child(quadrant::quad_enum t, data_t d) {
 		child[t] = new node(d, BLACK);
         child[t]->set_father(this);
 		return child[t];
@@ -57,20 +57,24 @@ struct node {
 		set_color(GREY);
 	}
 
-	void set_data(data_t* d) {
+	void set_data(data_t d) {
 		data = d;
 	}
 
-	void clear_data() {
-		data = nullptr;
-	}
-
-	data_t* get_data() {
+	data_t get_data() {
 		return data;
 	}
 
+	void clear_data() {
+		data = {};
+	}
+
 	const point_t& get_point() {
-		return data->first;
+		return data.first;
+	}
+
+	const unsigned& get_value() {
+		return data.second;
 	}
 
 	color_enum get_color() {

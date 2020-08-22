@@ -30,8 +30,6 @@ void debug(node* n, quad_t q, quad_enum t = ORIGIN) {
 
 class quad_tree
 {
-	vector<data_t> data;
-
 	size_t size_ = 0;
 
 	const quad_t origin = { {.0, .0}, {90.0, 180.0} };
@@ -111,7 +109,7 @@ class quad_tree
 			auto [n, q] = Q.front();
 			Q.pop();
 
-			for (auto& t: quad_lookup) {
+			for (auto& t: {NE, NW, SE, SW}) {
 				auto c = n->get_child(t);
 				auto qs = subdivide_zone(t, q);
 
@@ -168,25 +166,15 @@ public:
 	/*  Constructor -----------------------------------------------------------
 	 */
 	quad_tree(double _lat, double _lon, vector<data_t> _data = {})
-	: data(_data)
-	, origin({ {.0, .0}, {_lat, _lon} })
+	: origin({ {.0, .0}, {_lat, _lon} })
 	{
-		// cout << std::setprecision(std::numeric_limits<double>::digits10);
-		// unsigned long long total_data = 0;
-		// unsigned long long total_inserted = 0;
-		for (auto& record: data) {
-			if (insert(&record)) {
-				// total_inserted += record.second;
-			}
-			// total_data += record.second;
-		}
-		// cout << "poblacion total insertados: " << total_inserted << endl;
-		// cout << "poblacion total datos: " << total_data << endl;
+		for (auto& record: _data)
+			insert(record);
 	}
 
 	/*  Find ------------------------------------------------------------------
 	 */
-	data_t* find(point_t p) {
+	data_t find(point_t p) {
 		node* entry = nullptr;
 		auto func = 
 			[&entry, p] (node* n) {
@@ -201,7 +189,7 @@ public:
 		if (entry != nullptr)
 			return entry->get_data();
 		else
-			return nullptr;
+			return {};
 	}
 
 	/*  Descend ---------------------------------------------------------------
@@ -244,7 +232,7 @@ public:
 		auto func = 
 			[&total_population, z] (node* n, quad_t q) { 
 				if (contains(n->get_point(), z))
-					total_population += n->get_data()->second;
+					total_population += n->get_value();
 			};
 
 		region_search(z, func);
@@ -277,12 +265,12 @@ public:
 		auto func = 
 			[&max_depth, z] (node* n, quad_t q) { 
 
-				double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
+				double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)));
 
 				max_depth = (max_depth > depth) ? max_depth : depth;
 			};
 
-		region_search_grey(z, func);
+		region_search(z, func);
 		return max_depth;
 	}
 
@@ -296,7 +284,7 @@ public:
 
 		auto func = 
 			[&histogram, z] (node* n, quad_t q) { 
-				size_t depth = ceil(log2(get<0>(z.second)/get<0>(q.second)))+1;
+				size_t depth = ceil(log2(get<0>(z.second)/get<0>(q.second)));
 
 				if (histogram.find(depth) == end(histogram))
 					histogram[depth] = 1;
@@ -308,25 +296,9 @@ public:
 		return histogram;
 	}
 
-	/*  Get Histogram 2D ------------------------------------------------------
+	/*  Get Histogram 2D ----------------------------------------------------------
 	 */
-	// vector<tuple<int, int, unsigned long>> get_histogram2d(int r) {
-	// 	auto [p, d] = origin;
-	// 	auto [dx, dy] = d;
-	// 	auto [dxr, dyr] = dist_t{dx/r, dy/r};
-
-	// 	for (int i = 0; i < r; ++i) {
-	// 		for (int j = 0; j < r; ++j) {
-	// 			quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
-
-	// 			cout << i << "," << j << "," << get_total_cities(z) << endl;
-	// 		}
-	// 	}
-	// }
-
-	/*  Get Histogram 2D ------------------------------------------------------
-	 */
-	vector<tuple<int, int, unsigned long>> get_histogram2d(int rx, int ry) {
+	vector<tuple<int, int, unsigned long>> histogram2d(int rx, int ry) {
 		auto [p, d] = origin;
 		auto [dx, dy] = d;
 		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
@@ -363,21 +335,19 @@ public:
 	 */
 	bool insert(data_t d) {
 		node* n = nullptr;
-		if ((n = insert(&d)) != nullptr) {
-			data.push_back(d);
-			
-			auto& ref = data.back();
-			n->set_data(&ref);
+
+		if ((n = insert(d.first)) != nullptr) {
+			n->set_data(d);
 
 			return true;
 		}
+
 		return false;
 	}
 
 	/*  Insert ----------------------------------------------------------------
 	 */
-	node* insert(data_t* d) {
-		point_t p = d->first;
+	node* insert(point_t p) {
 		quad_t q = origin;
 		quad_t qs = origin;
 		// cout << "[insert]: " << p << endl;
@@ -386,7 +356,7 @@ public:
 		node* child   = current;
 
 		if (root == nullptr) {
-			root = new node(d, node::BLACK);
+			root = new node({}, node::BLACK);
 
 			// cout << "root: ";
 			// debug(root, q, ORIGIN);
@@ -431,7 +401,7 @@ public:
 
 			// nodo blanco
 			if (child == nullptr) {
-				child = current->make_child(t, d);
+				child = current->make_child(t, {});
 				// cout << "[inserting]: " << p << endl;
 			}
 			else if (child->get_color() == node::BLACK) {
@@ -456,8 +426,7 @@ public:
 	bool remove(point_t p){
 
 		node* temp = descend(p);
-		node* father = temp->get_father();
-		data_t* data;
+		data_t data;
 		int index;
 
 		// se comprueba la existencia de la ciudad
@@ -474,7 +443,7 @@ public:
 
 		// es necesaria una referencia directa al padre para evitar casos problematicos
 		// en que el nodo elimine referencias asi mismo usando temp->father->{first,second,...}
-		father = temp->get_father();
+		node* father = temp->get_father();
 
 		// se borran los datos del nodo y se reinicia
 		for(int i=0; i<4; i++){

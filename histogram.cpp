@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 
 	int s = 5;
 	auto hist = qtree.get_histogram2d(s*90., s*180.);
-	// auto hist = qtree.get_histogram2d(3, 3);
+	// auto hist = qtree.get_histogram2d(s, s);
 
 	for (const auto& t: hist)
 		cout << get<0>(t) << "," << get<1>(t) << "," << get<2>(t) << endl;

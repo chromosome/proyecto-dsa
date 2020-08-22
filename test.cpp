@@ -17,12 +17,50 @@ int main(int argc, char const *argv[])
 	}
 
 	// insercion --------------------------------------------------------------
-	dsa::quad_tree qtree(90., 180., read_data(filename));
+	auto data = read_data(filename);
+	dsa::quad_tree tree(90., 180.);
 
-	// qtree.inorder_walk();
+	for (const auto& record: data)
+		tree.insert(record);
 
-	// // dsa::quad_t q = {{110., 0.}, {30, 30}};
-	// dsa::quad_t q = {{2000., 0.}, {30, 30}};
+	// auto tree = make_quad_tree(filename, 90., 180.);
+	cout << "inserted: " << tree.size() << endl << endl;
 
-	profile([&qtree] { qtree.inorder_walk(); });
+	// busqueda ---------------------------------------------------------------
+	point_t city = {50.523429, 29.461285};
+	for (const auto& record: data) {
+		data_t d = tree.find(record.first);
+		if (d != data_t())
+			cout << "found: " << d.first << ": " << d.second << endl << endl;
+		else
+			cout << "not found!" << endl << endl;
+	}
+
+	// Borrar -----------------------------------------------------------------
+	if (tree.remove(city))
+		cout << "removed" << endl << endl;
+	else
+		cout << "not removed" << endl << endl;
+
+	data_t d = tree.find(city);
+	if (d != data_t())
+		cout << "found: " << d.first << ": " << d.second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+	tree.insert({{50.523429, 29.461285}, 10});
+
+	d = tree.find(city);
+	if (d != data_t())
+		cout << "found: " << d.first << ": " << d.second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+
+	// Puntos por region ------------------------------------------------------
+
+	dsa::quad_t q = {{0, 0}, {200, 200}};
+	cout << "total cities: " << tree.get_total_cities(q) << endl << endl;
+
+	profile([&tree] { tree.inorder_walk(); });
 }

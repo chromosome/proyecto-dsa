@@ -23,9 +23,9 @@ int main(int argc, char const *argv[])
 	// busqueda ---------------------------------------------------------------
 	// point_t city = {50,29};
 	point_t city = {50.523429, 29.461285};
-	data_t* d = qtree.find(city);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	data_t d = qtree.find(city);
+	if (d != data_t{ })
+		cout << "found: " << d.first << ": " << d.second << endl << endl;
 	else
 		cout << "not found!" << endl << endl;
 
@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
 		cout << k << ": " << v << endl;
 	cout << endl;
 
-	// qtree.get_histogram2d(4);
+	qtree.get_histogram2d(4, 4);
 
 	// operaciones entre cuadrantes -------------------------------------------
 	dsa::quad_t z = {{0, 0}, {2, 2}};
