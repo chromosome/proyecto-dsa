@@ -5,14 +5,18 @@
 using namespace std;
 
 class CITY {
+
     public:
+
         unsigned long long population;
         double geoPointX;
         double geoPointY;
 };
 
 class NODE {
+
     public:
+
         CITY* data      = NULL;
         char color      = 'w';
         NODE* father    = NULL;
@@ -23,6 +27,7 @@ class NODE {
         double x        = 0.0;
         double y        = 0.0;
         double w        = 0.0;
+        double h        = 0.0;
         int depth       = 0;
 
         int count_colors(char);
@@ -33,36 +38,42 @@ class PR_QUADTREE {
 
     public:
 
-        NODE* _root                     = NULL;
-        double _x                       = -256.0; // minX = -54.9333 maxX = 82.4833
-        double _y                       = -256.0; // minY = -179.983 maxY = 180
-        double _w                       = 512.0;
-        int _totalPoints                = 0;
-        unsigned long long _totalPopulation   = 0;
-        int _maxDepth                   = 0;
+        NODE* _root                             = NULL;
+        double _x                               = -256.0; // minX = -54.9333 maxX = 82.4833
+        double _y                               = -256.0; // minY = -179.983 maxY = 180
+        double _w                               =  512.0;
+        double _h                               =  512.0;
+        int _totalPoints                        =  0;
+        unsigned long long _totalPopulation     =  0;
+        int _maxDepth                           =  0;
 
-        PR_QUADTREE();
+        PR_QUADTREE(double, double, double, double);
         ~PR_QUADTREE();
-        void insert(double, double, CITY*);
+        bool insert(double, double, CITY*);
         int remove(double, double);
         unsigned long long total_population(double, double);
         NODE* search_node(double, double);
         NODE* search_city(double, double);
-        int cities_in_region_driver(NODE*, double, double, double);
-        int cities_in_region(double, double, double);
-        unsigned long long population_in_region_driver(NODE*, double, double, double);
-        unsigned long long population_in_region(double, double, double);
-        int depths_in_region_driver(NODE*, double, double, double);
-        int depths_in_region(double, double, double);
-        bool collides(double, double, double, double, double, double);
+        int cities_in_region_driver(NODE*, double, double, double, double);
+        int cities_in_region(double, double, double, double);
+        unsigned long long population_in_region_driver(NODE*, double, double, double, double);
+        unsigned long long population_in_region(double, double, double, double);
+        int depths_in_region_driver(NODE*, double, double, double, double);
+        int depths_in_region(double, double, double, double);
+        bool collides(double, double, double, double, double, double, double, double);
 
 };
 
-PR_QUADTREE::PR_QUADTREE(){
+PR_QUADTREE::PR_QUADTREE(double x = -256, double y = -256, double w = 512, double h = 512){
+    _x = x;
+    _y = y;
+    _w = w;
+    _h = h;
     _root = new NODE;
-    _root->x = _x;
-    _root->y = _y;
-    _root->w = _w;
+    _root->x = x;
+    _root->y = y;
+    _root->w = w;
+    _root->h = h;
 }
 
 PR_QUADTREE::~PR_QUADTREE(){}
@@ -79,7 +90,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al primer cuadrante?
         if(node->x <= x && x < node->x + node->w/2 &&
-           node->y + node->w/2 <= y && y < node->y + node->w){
+           node->y + node->h/2 <= y && y < node->y + node->h){
 
                 if(node->color != 'g')
                     break;
@@ -88,7 +99,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al segundo cuadrante?
         } else if(node->x + node->w/2 <= x && x < node->x + node->w &&
-           node->y + node->w/2 <= y && y < node->y + node->w){
+           node->y + node->h/2 <= y && y < node->y + node->h){
 
                 if(node->color != 'g')
                     break;
@@ -97,7 +108,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al tercer cuadrante?
         } else if(node->x <= x && x < node->x + node->w/2 &&
-           node->y <= y && y < node->y + node->w/2){
+           node->y <= y && y < node->y + node->h/2){
 
                 if(node->color != 'g')
                     break;
@@ -106,7 +117,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 
         // punto pertenece al cuarto cuadrante?
         } else if(node->x + node->w/2 <= x && x < node->x + node->w &&
-           node->y <= y && y < node->y + node->w/2){
+           node->y <= y && y < node->y + node->h/2){
 
                 if(node->color != 'g')
                     break;
@@ -140,9 +151,10 @@ NODE* PR_QUADTREE::search_city(double x, double y){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void PR_QUADTREE::insert(double x, double y, CITY* city){
+bool PR_QUADTREE::insert(double x, double y, CITY* city){
 
     // se prueba la preexistencia de una ciudad en el mismo punto (en ese caso se ignora)
+    // (search_node solo puede devolver nodos blancos o negros, nunca NULL ;D)
     NODE* node = search_node(x,y);
 
     // si existe una ciudad en la misma posicion se evita el insert
@@ -150,7 +162,9 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
 
         // si ya existe una ciudad con esta posicion se ignora
         // la nueva ciudad y se aprovecha de liberar su memoria
+        // luego se retorna
         delete city;
+        return(false);
 
     } else {
 
@@ -191,49 +205,49 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
 
                 // punto1 pertenece al primer subcuadrante?
                 if(temp->x <= x && x < temp->x + temp->w/2 &&
-                   temp->y + temp->w/2 <= y && y < temp->y + temp->w){
+                   temp->y + temp->h/2 <= y && y < temp->y + temp->h){
 
                         cuadrante1 = 1;
 
                 // punto1 pertenece al segundo subcuadrante?
                 } else if(temp->x + temp->w/2 <= x && x < temp->x + temp->w &&
-                   temp->y + temp->w/2 <= y && y < temp->y + temp->w){
+                   temp->y + temp->h/2 <= y && y < temp->y + temp->h){
 
                         cuadrante1 = 2;
 
                 // punto1 pertenece al tercer subcuadrante?
                 } else if(temp->x <= x && x < temp->x + temp->w/2 &&
-                   temp->y <= y && y < temp->y + temp->w/2){
+                   temp->y <= y && y < temp->y + temp->h/2){
 
                         cuadrante1 = 3;
 
                 // punto1 pertenece al cuarto subcuadrante?
                 } else if(temp->x + temp->w/2 <= x && x < temp->x + temp->w &&
-                   temp->y <= y && y < temp->y + temp->w/2){
+                   temp->y <= y && y < temp->y + temp->h/2){
 
                         cuadrante1 = 4;
 
                 // punto2 pertenece al primer subcuadrante?
                 } if(temp->x <= oldX && oldX < temp->x + temp->w/2 &&
-                   temp->y + temp->w/2 <= oldY && oldY < temp->y + temp->w){
+                   temp->y + temp->h/2 <= oldY && oldY < temp->y + temp->h){
 
                         cuadrante2 = 1;
 
                 // punto2 pertenece al segundo subcuadrante?
                 } else if(temp->x + temp->w/2 <= oldX && oldX < temp->x + temp->w &&
-                   temp->y + temp->w/2 <= oldY && oldY < temp->y + temp->w){
+                   temp->y + temp->h/2 <= oldY && oldY < temp->y + temp->h){
 
                         cuadrante2 = 2;
 
                 // punto2 pertenece al tercer subcuadrante?
                 } else if(temp->x <= oldX && oldX < temp->x + temp->w/2 &&
-                   temp->y <= oldY && oldY < temp->y + temp->w/2){
+                   temp->y <= oldY && oldY < temp->y + temp->h/2){
 
                         cuadrante2 = 3;
 
                 // punto2 pertenece al cuarto subcuadrante?
                 } else if(temp->x + temp->w/2 <= oldX && oldX < temp->x + temp->w &&
-                   temp->y <= oldY && oldY < temp->y + temp->w/2){
+                   temp->y <= oldY && oldY < temp->y + temp->h/2){
 
                         cuadrante2 = 4;
 
@@ -245,18 +259,18 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->first->depth = temp->depth + 1;
                 temp->first->color = 'w';
                 temp->first->x = temp->x;
-                temp->first->y = temp->y + temp->w/2;
+                temp->first->y = temp->y + temp->h/2;
                 temp->first->w = temp->w/2;
-                temp->first->w = temp->w/2;
+                temp->first->h = temp->h/2;
 
                 temp->second = new NODE;
                 temp->second->father = temp;
                 temp->second->depth = temp->depth + 1;
                 temp->second->color = 'w';
                 temp->second->x = temp->x + temp->w/2;
-                temp->second->y = temp->y + temp->w/2;
+                temp->second->y = temp->y + temp->h/2;
                 temp->second->w = temp->w/2;
-                temp->second->w = temp->w/2;
+                temp->second->h = temp->h/2;
 
                 temp->third = new NODE;
                 temp->third->father = temp;
@@ -265,7 +279,7 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->third->x = temp->x;
                 temp->third->y = temp->y;
                 temp->third->w = temp->w/2;
-                temp->third->w = temp->w/2;
+                temp->third->h = temp->h/2;
 
                 temp->fourth = new NODE;
                 temp->fourth->father = temp;
@@ -274,13 +288,14 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->x = temp->x + temp->w/2;
                 temp->fourth->y = temp->y;
                 temp->fourth->w = temp->w/2;
-                temp->fourth->w = temp->w/2;
+                temp->fourth->h = temp->h/2;
 
-                // se actualiza el contador de maxima profundidad del quadtree :p
+                // se actualiza el contador de maxima profundidad del quadtree? :p
                 if(_maxDepth < temp->depth + 1)
                     _maxDepth = temp->depth + 1;
 
                 // condicion de termino para creacion de subnodos
+                // cuando ambos puntos no estan en el mismo cuadrante
                 if(cuadrante1 != cuadrante2){
                     break;
                 } else if(cuadrante1 == 1){
@@ -325,10 +340,13 @@ void PR_QUADTREE::insert(double x, double y, CITY* city){
             }
 
         }
-
-        // se aumenta el contador de puntos del quadtree
-        _totalPoints++;
     }
+
+    // se aumenta el contador de puntos del quadtree
+    _totalPoints++;
+
+    return(true);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -435,9 +453,9 @@ unsigned long long PR_QUADTREE::total_population(double x, double y){
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-
-bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Bx, double By, double Bw){
-    if( ( abs(Ax-Bx) <= 2*(Aw+Bw) ) && ( abs(Ay-By) <= 2*(Aw+Bw) ) )
+// devuelve true si existe colision entre dos rectangulos A y B con centro (x,y) con radios w y h (no diametros!)
+bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Ah, double Bx, double By, double Bw, double Bh){
+    if( ( abs(Ax-Bx) <= (Aw+Bw) ) && ( abs(Ay-By) <= (Ah+Bh) ) )
         return(true);
     else
         return(false);
@@ -445,7 +463,12 @@ bool PR_QUADTREE::collides(double Ax, double Ay, double Aw, double Bx, double By
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PR_QUADTREE::cities_in_region_driver(NODE* node, double rx, double ry, double rw){
+// devuelve total de ciudades en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
+int PR_QUADTREE::cities_in_region(double x, double y, double w, double h){
+    return(cities_in_region_driver(_root, x, y, w, h));
+}
+
+int PR_QUADTREE::cities_in_region_driver(NODE* node, double rx, double ry, double rw, double rh){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -457,39 +480,40 @@ int PR_QUADTREE::cities_in_region_driver(NODE* node, double rx, double ry, doubl
         double nx = node->data->geoPointX;
         double ny = node->data->geoPointY;
 
-        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+        if(rx-rw <= nx && nx < rx + rw && ry-rh <= ny && ny < ry + rh)
            return(1);
         else
             return(0);
 
-    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    // se comprueba cuales cuadrantes colisionan con la region y se acumulan
     } else if(node->color == 'g') {
 
         int ctr = 0;
-        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
-            ctr += cities_in_region_driver(node->first,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->first->x + node->first->w/2, node->first->y + node->first->h/2, node->first->w/2, node->first->h/2 ))
+            ctr += cities_in_region_driver(node->first,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
-            ctr += cities_in_region_driver(node->second, rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->second->x + node->second->w/2, node->second->y + node->second->h/2, node->second->w/2, node->second->h/2 ))
+            ctr += cities_in_region_driver(node->second,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
-            ctr += cities_in_region_driver(node->third,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->third->x + node->third->w/2, node->third->y + node->third->h/2, node->third->w/2, node->third->h/2 ))
+            ctr += cities_in_region_driver(node->third,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
-            ctr += cities_in_region_driver(node->fourth, rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->h/2, node->fourth->w/2, node->fourth->h/2 ))
+            ctr += cities_in_region_driver(node->fourth,  rx, ry, rw, rh);
 
         return(ctr);
 
     }
 }
 
-int PR_QUADTREE::cities_in_region(double x, double y, double w){
-    return(cities_in_region_driver(_root, x, y, w));
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw){
+// devuelve total de poblacion en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
+unsigned long long PR_QUADTREE::population_in_region(double x, double y, double w, double h){
+    return(population_in_region_driver(_root, x, y, w, h));
+}
+
+unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double rx, double ry, double rw, double rh){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -501,41 +525,41 @@ unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double r
         double nx = node->data->geoPointX;
         double ny = node->data->geoPointY;
 
-        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+        if(rx-rw <= nx && nx < rx + rw && ry-rh <= ny && ny < ry + rh)
            return(node->data->population);
         else
             return(0);
 
-    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    // se comprueba cuales cuadrantes colisionan con la region y se acumulan
     } else if(node->color == 'g') {
 
         unsigned long long ctr = 0;
-        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
-            ctr += population_in_region_driver(node->first,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->first->x + node->first->w/2, node->first->y + node->first->h/2, node->first->w/2, node->first->h/2 ))
+            ctr += population_in_region_driver(node->first,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
-            ctr += population_in_region_driver(node->second, rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->second->x + node->second->w/2, node->second->y + node->second->h/2, node->second->w/2, node->second->h/2 ))
+            ctr += population_in_region_driver(node->second,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
-            ctr += population_in_region_driver(node->third,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->third->x + node->third->w/2, node->third->y + node->third->h/2, node->third->w/2, node->third->h/2 ))
+            ctr += population_in_region_driver(node->third,  rx, ry, rw, rh);
 
-        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
-            ctr += population_in_region_driver(node->fourth, rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->h/2, node->fourth->w/2, node->fourth->h/2 ))
+            ctr += population_in_region_driver(node->fourth,  rx, ry, rw, rh);
 
         return(ctr);
 
     }
-}
-
-unsigned long long PR_QUADTREE::population_in_region(double x, double y, double w){
-    return(population_in_region_driver(_root, x, y, w));
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+// devuelve las profundidades máximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
+int PR_QUADTREE::depths_in_region(double x, double y, double w, double h){
+    return(depths_in_region_driver(_root, x, y, w, h));
+}
 
-int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, double rw){
+int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, double rw, double rh){
 
     // si no existen puntos
     if(node == NULL || node->color == 'w')
@@ -547,49 +571,227 @@ int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, doubl
         double nx = node->data->geoPointX;
         double ny = node->data->geoPointY;
 
-        if(rx-rw/2 <= nx && nx < rx + rw/2 && ry-rw/2 <= ny && ny < ry + rw/2)
+        if(rx-rw <= nx && nx < rx + rw && ry-rh <= ny && ny < ry + rh)
            return(node->depth);
         else
             return(0);
 
-    // si hay mas de un cuadrante se comprueba que el cuadrante y region colisionen
+    // se comprueba cuales cuadrantes colisionan con la region y se acumulan
     } else if(node->color == 'g') {
 
         int maxDepth = 0;
         int temp = 0;
 
-        if(collides(rx, ry, rw/2, node->first->x + node->first->w/2, node->first->y + node->first->w/2, node->first->w/2 ))
-            temp = depths_in_region_driver(node->first,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->first->x + node->first->w/2, node->first->y + node->first->h/2, node->first->w/2, node->first->h/2 )){
+            temp = depths_in_region_driver(node->first,  rx, ry, rw, rh);
             if(temp > maxDepth)
                 maxDepth = temp;
+        }
 
-        if(collides(rx, ry, rw/2, node->second->x + node->second->w/2, node->second->y + node->second->w/2, node->second->w/2 ))
-            temp = depths_in_region_driver(node->second,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->second->x + node->second->w/2, node->second->y + node->second->h/2, node->second->w/2, node->second->h/2 )){
+            temp = depths_in_region_driver(node->second,  rx, ry, rw, rh);
             if(temp > maxDepth)
                 maxDepth = temp;
+        }
 
-        if(collides(rx, ry, rw/2, node->third->x + node->third->w/2, node->third->y + node->third->w/2, node->third->w/2 ))
-            temp = depths_in_region_driver(node->third,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->third->x + node->third->w/2, node->third->y + node->third->h/2, node->third->w/2, node->third->h/2 )){
+            temp = depths_in_region_driver(node->third,  rx, ry, rw, rh);
             if(temp > maxDepth)
                 maxDepth = temp;
+        }
 
-        if(collides(rx, ry, rw/2, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->w/2, node->fourth->w/2 ))
-            temp = depths_in_region_driver(node->fourth,  rx, ry, rw);
+        if(collides(rx, ry, rw, rh, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->h/2, node->fourth->w/2, node->fourth->h/2 )){
+            temp = depths_in_region_driver(node->fourth,  rx, ry, rw, rh);
             if(temp > maxDepth)
                 maxDepth = temp;
+        }
 
         return(maxDepth);
 
     }
 }
 
-int PR_QUADTREE::depths_in_region(double x, double y, double w){
-    return(depths_in_region_driver(_root, x, y, w));
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
+
+/*
+    // se crea un quad_tree para hacer pruebas
+    quad_tree qtree(256.0,256.0);
+
+    // puntos de prueba
+    data_t p1, p2, p3, p4, p5, p6, p7, p8;
+
+    //          x        y      dato
+    p1 = { {  128.0  , -128.0} ,  0};
+    p2 = { {  128.0  ,  128.0} ,  1};
+    p3 = { {  -16.0  ,   16.0} ,  2};
+    p4 = { {  -16.0  ,   48.0} ,  3};
+    p5 = { { -240.0  ,  240.0} ,  4};
+
+    // se inserta p1 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p1);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+
+    // se inserta p2 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p2);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+
+    // se inserta p3 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p3);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+    cout << "depth p3: " << qtree.depth(p3.first) << endl;
+
+    // se inserta p4 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p4);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+    cout << "depth p3: " << qtree.depth(p3.first) << endl;
+    cout << "depth p4: " << qtree.depth(p4.first) << endl;
+
+    // se inserta p5 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p5);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+    cout << "depth p3: " << qtree.depth(p3.first) << endl;
+    cout << "depth p4: " << qtree.depth(p4.first) << endl;
+    cout << "depth p5: " << qtree.depth(p5.first) << endl;
+
+    // se remueve p4 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.remove(p4.first);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+    cout << "depth p3: " << qtree.depth(p3.first) << endl;
+    //cout << "depth p4: " << qtree.depth(p4.first) << endl;
+    cout << "depth p5: " << qtree.depth(p5.first) << endl;
+
+    // se inserta p4 y se comprueba el estado del quadtree
+    cout << "///////////////////////////////////////////" << endl;
+    qtree.insert(p4);
+    cout << "total puntos en quadtree: " << qtree.size() << endl;
+    cout << "depth p1: " << qtree.depth(p1.first) << endl;
+    cout << "depth p2: " << qtree.depth(p2.first) << endl;
+    cout << "depth p3: " << qtree.depth(p3.first) << endl;
+    cout << "depth p4: " << qtree.depth(p4.first) << endl;
+    cout << "depth p5: " << qtree.depth(p5.first) << endl;
+
+
+
+    //std::cout << "\x1B[2J\x1B[H";
+
+
+	data_t* d = qtree.find(p1.first);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+
+	d = qtree.find(p2.first);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+	d = qtree.find(p3.first);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+	d = qtree.find(p4.first);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+	d = qtree.find(p5.first);
+	if (d)
+		cout << "found: " << d->first << ": " << d->second << endl << endl;
+	else
+		cout << "not found!" << endl << endl;
+
+
+    /*
+    string filename;
+
+    filename = "test2.csv";
+	quad_tree qtree(90.0,180.0,read_data(filename));
+
+	cout << "inserted: " << qtree.size() << endl << endl;
+
+    cout << endl;
+
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.0, -80.0>" << ": " << qtree.depth({-80.0, -80.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+
+	cout << endl;
+
+	// remove -----------------------------------------------------------------
+	if (qtree.remove({-80.0, -80.0}))
+		cout << "removed:" << "<-80.0, -80.0>" << endl << endl;
+
+	if(qtree.find({-80.0, -80.0}) == nullptr)
+        cout << "fue eliminado" << endl << endl;
+
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+	// remove -----------------------------------------------------------------
+	if (qtree.remove({-10.0, -10.0}))
+		cout << "removed:" << "-10.0, -10.0" << endl << endl;
+
+	if(qtree.find({-10.0, -10.0}) == nullptr)
+        cout << "fue eliminado" << endl << endl;
+
+	// profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+	// remove -----------------------------------------------------------------
+	if (qtree.remove({10.0, 10.0}))
+		cout << "removed:" << "10.0, 10.0" << endl << endl;
+
+    // profundidad de puntos ------------------------------------------------
+	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
+	cout << endl;
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
     // lectura de datos
     fstream file;
@@ -663,8 +865,9 @@ int main(int argc, char **argv) {
     double rx = 0.0;
     double ry = 0.0;
     double rw = 400.0;
-    cout << "busqueda por region -> ciudades en: " << cities.cities_in_region(rx, ry, rw) << endl;
-    cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw) << endl;
+    double rh = 400.0;
+    cout << "busqueda por region -> ciudades en: " << cities.cities_in_region(rx, ry, rw, rh) << endl;
+    cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw, rh) << endl;
 
     // pruebas remove
 
@@ -685,8 +888,9 @@ int main(int argc, char **argv) {
     for(int i=0; i<sub; i++){
         for(int j=0; j<sub; j++){
             temp2 = cities.depths_in_region( cities._x + i*cities._w/(sub),
-                                             cities._y + j*cities._w/(sub),
-                                             cities._w/(sub) );
+                                             cities._y + j*cities._h/(sub),
+                                             cities._w/(sub),
+                                             cities._h/(sub) );
 
             file << i << "," << j << "," << temp2 << endl;
             temp3 += temp2;
