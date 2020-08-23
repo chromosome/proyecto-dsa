@@ -24,7 +24,7 @@ void insertion_time(string filename) {
 	}
 }
 
-void insertion_time2(string filename) {
+void insertion_depth(string filename) {
 	quad_tree tree(90.0, 180.0);
 
 	auto data = read_data(filename);
@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	insertion_time2(filename);
+	insertion_depth(filename);
 
 	return 0;
 }

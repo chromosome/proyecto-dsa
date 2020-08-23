@@ -29,8 +29,18 @@ void insertion_time2(string filename) {
 
 	auto data = read_data(filename);
 
-	for (const auto& record: data)
-		profile([&tree, record] { tree.insert(record); });
+	int reps = 10;
+	double elapsed = 0.;
+	for (const auto& record: data) {
+		if (tree.insert(record)) {
+			for (int i = 0; i < reps; ++i) {
+				tree.remove(record.first);
+				elapsed += profile([&tree, record] {tree.insert(record); });
+			}
+			cout << elapsed/reps << endl;
+			elapsed = 0.;
+		}
+	}
 }
 
 int main(int argc, char const *argv[])
