@@ -12,7 +12,7 @@ import os
 #dataFile = open("citiesPerRegion_250x250.txt","r")
 #dataFile = open("populationPerRegion_100x100.txt","r")
 #dataFile = open("populationPerRegion_360x360.txt","r")
-dataFile = open("depthsPerRegion_180x360.txt","r")
+dataFile = open("depthsPerRegion_with_zone_1800x3600.txt","r")
 
 x = []
 y = []
@@ -28,7 +28,7 @@ for line in dataFile:
 dataFile.close()
 
 
-mat = np.array( z ).reshape((180,360))
+mat = np.array( z ).reshape((1800,3600))
 
 print(mat.shape)
 

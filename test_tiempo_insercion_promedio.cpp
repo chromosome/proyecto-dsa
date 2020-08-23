@@ -636,6 +636,7 @@ int main(int argc, char **argv) {
     string word;
     string temp;
     int ctr = 0;
+    auto accum = 0.0;
 
 
     PR_QUADTREE cities;
@@ -682,13 +683,13 @@ int main(int argc, char **argv) {
         auto start = chrono::steady_clock::now();
         cities.insert(city->geoPointX, city->geoPointY, city);
         auto end = chrono::steady_clock::now();
-        file2 << std::setprecision(10) << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6 << endl;
+        accum += chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6;
 
         ctr++;
 
     }
 
-    cout << cities._maxDepth << endl;
+    cout << std::setprecision(10) << accum/cities._totalPoints << endl;
 
     file.close();
     file2.close();

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -46,7 +45,6 @@ class PR_QUADTREE {
         double _h;
         int _totalPoints                        =  0;
         unsigned long long _totalPopulation     =  0;
-        int _maxDepth                           =  0;
 
         PR_QUADTREE(double, double, double, double);
         ~PR_QUADTREE();
@@ -61,7 +59,10 @@ class PR_QUADTREE {
         unsigned long long population_in_region(double, double, double, double);
         int depths_in_region_driver(NODE*, double, double, double, double);
         int depths_in_region(double, double, double, double);
+        int depths_in_region_with_zone_driver(NODE*, double, double, double, double);
+        int depths_in_region_with_zone(double, double, double, double);
         bool collides(double, double, double, double, double, double, double, double);
+        int get_max_depth(void);
 
 };
 
@@ -85,7 +86,7 @@ PR_QUADTREE::~PR_QUADTREE(){}
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-// devuelve un puntero a nodo con el cuadrante mas pequeño que incluye la posicion (x,y)
+// devuelve un puntero a nodo con el cuadrante mas pequeÃ±o que incluye la posicion (x,y)
 NODE* PR_QUADTREE::search_node(double x, double y){
 
     NODE* node = _root;
@@ -131,7 +132,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
         }
     }
 
-    // devuelve el nodo blanco o negro donde tendría que estar el punto
+    // devuelve el nodo blanco o negro donde tendrÃ­a que estar el punto
     // en teoria hasta este punto node solo puede ser blanco o negro, nunca NULL
     return(node);
 
@@ -142,7 +143,7 @@ NODE* PR_QUADTREE::search_node(double x, double y){
 // devuelve un puntero al nodo que contiene la ciudad o NULL si no existe
 NODE* PR_QUADTREE::search_city(double x, double y){
 
-    // se busca el nodo blanco o negro donde tendría que estar el punto
+    // se busca el nodo blanco o negro donde tendrÃ­a que estar el punto
     NODE* node = search_node(x,y);
 
     // se devuelve el nodo que contiene la ciudad en x,y si existe o NULL si no existe
@@ -293,10 +294,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->y = temp->y;
                 temp->fourth->w = temp->w/2;
                 temp->fourth->h = temp->h/2;
-
-                // se actualiza el contador de maxima profundidad del quadtree? :p
-                if(_maxDepth < temp->depth + 1)
-                    _maxDepth = temp->depth + 1;
 
                 // condicion de termino para creacion de subnodos
                 // cuando ambos puntos no estan en el mismo cuadrante
@@ -558,7 +555,11 @@ unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double r
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// devuelve las profundidades máximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
+int PR_QUADTREE::get_max_depth(void){
+    return(depths_in_region(_x, _y, _w*1000, _h*1000));
+}
+
+// devuelve las profundidades mÃ¡ximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
 int PR_QUADTREE::depths_in_region(double x, double y, double w, double h){
     return(depths_in_region_driver(_root, x, y, w, h));
 }
@@ -616,27 +617,73 @@ int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, doubl
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+// devuelve las profundidades mÃ¡ximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
+int PR_QUADTREE::depths_in_region_with_zone(double x, double y, double w, double h){
+    return(depths_in_region_with_zone_driver(_root, x, y, w, h));
+}
+
+int PR_QUADTREE::depths_in_region_with_zone_driver(NODE* node, double rx, double ry, double rw, double rh){
+
+    // si no existen puntos
+    if(node == NULL || node->color == 'w')
+        return(0);
+
+    // si hay un solo punto se comprueba su pertenencia a la region
+    if(node->color == 'b'){
+
+        return(node->depth);
+
+
+    // se comprueba cuales cuadrantes colisionan con la region y se acumulan
+    } else if(node->color == 'g') {
+
+        int maxDepth = 0;
+        int temp = 0;
+
+        if(collides(rx, ry, rw, rh, node->first->x + node->first->w/2, node->first->y + node->first->h/2, node->first->w/2, node->first->h/2 )){
+            temp = depths_in_region_with_zone_driver(node->first,  rx, ry, rw, rh);
+            if(temp > maxDepth)
+                maxDepth = temp;
+        }
+
+        if(collides(rx, ry, rw, rh, node->second->x + node->second->w/2, node->second->y + node->second->h/2, node->second->w/2, node->second->h/2 )){
+            temp = depths_in_region_with_zone_driver(node->second,  rx, ry, rw, rh);
+            if(temp > maxDepth)
+                maxDepth = temp;
+        }
+
+        if(collides(rx, ry, rw, rh, node->third->x + node->third->w/2, node->third->y + node->third->h/2, node->third->w/2, node->third->h/2 )){
+            temp = depths_in_region_with_zone_driver(node->third,  rx, ry, rw, rh);
+            if(temp > maxDepth)
+                maxDepth = temp;
+        }
+
+        if(collides(rx, ry, rw, rh, node->fourth->x + node->fourth->w/2, node->fourth->y + node->fourth->h/2, node->fourth->w/2, node->fourth->h/2 )){
+            temp = depths_in_region_with_zone_driver(node->fourth,  rx, ry, rw, rh);
+            if(temp > maxDepth)
+                maxDepth = temp;
+        }
+
+        return(maxDepth);
+
+    }
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
     // lectura de datos
     fstream file;
-    fstream file2;
     file.open("worldcitiespop_fixed.csv");
-    file2.open("insertion_time.dat");
-
     //file.open("mini.csv");
     string line;
     string word;
     string temp;
     int ctr = 0;
-
 
     PR_QUADTREE cities;
 
@@ -679,19 +726,35 @@ int main(int argc, char **argv) {
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
-        auto start = chrono::steady_clock::now();
         cities.insert(city->geoPointX, city->geoPointY, city);
-        auto end = chrono::steady_clock::now();
-        file2 << std::setprecision(10) << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6 << endl;
 
         ctr++;
 
     }
 
-    cout << cities._maxDepth << endl;
-
     file.close();
-    file2.close();
+
+    // datos de histograma para graficar
+    double sub  = 10.0;
+    double subX = 180*sub;
+    double subY = 360*sub;
+    unsigned long long temp2 = 0, temp3 = 0;
+    file.open("depthsPerRegion_with_zone_1800x3600.txt");
+
+    for(int i=0; i<subX; i++){
+        for(int j=0; j<subY; j++){
+            temp2 = cities.depths_in_region_with_zone( cities._x + i*cities._w/(subX),
+                                                       cities._y + j*cities._h/(subY),
+                                                       cities._w/(subX),
+                                                       cities._h/(subY) );
+
+            file << i << "," << j << "," << temp2 << endl;
+            temp3 += temp2;
+            //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
+        }
+        cout << i << " " << " " << temp2 << endl;
+    }
+    file.close();
 
     //while(1){}
 

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -46,7 +45,6 @@ class PR_QUADTREE {
         double _h;
         int _totalPoints                        =  0;
         unsigned long long _totalPopulation     =  0;
-        int _maxDepth                           =  0;
 
         PR_QUADTREE(double, double, double, double);
         ~PR_QUADTREE();
@@ -62,6 +60,7 @@ class PR_QUADTREE {
         int depths_in_region_driver(NODE*, double, double, double, double);
         int depths_in_region(double, double, double, double);
         bool collides(double, double, double, double, double, double, double, double);
+        int get_max_depth(void);
 
 };
 
@@ -293,10 +292,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->y = temp->y;
                 temp->fourth->w = temp->w/2;
                 temp->fourth->h = temp->h/2;
-
-                // se actualiza el contador de maxima profundidad del quadtree? :p
-                if(_maxDepth < temp->depth + 1)
-                    _maxDepth = temp->depth + 1;
 
                 // condicion de termino para creacion de subnodos
                 // cuando ambos puntos no estan en el mismo cuadrante
@@ -558,6 +553,10 @@ unsigned long long PR_QUADTREE::population_in_region_driver(NODE* node, double r
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+int PR_QUADTREE::get_max_depth(void){
+    return(depths_in_region(_x, _y, _w*1000, _h*1000));
+}
+
 // devuelve las profundidades máximas en region acotada por un rectangulo centrado en (x,y) con radios w y h (no diametros!)
 int PR_QUADTREE::depths_in_region(double x, double y, double w, double h){
     return(depths_in_region_driver(_root, x, y, w, h));
@@ -621,22 +620,14 @@ int PR_QUADTREE::depths_in_region_driver(NODE* node, double rx, double ry, doubl
 
 int main(int argc, char **argv) {
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
     // lectura de datos
     fstream file;
-    fstream file2;
     file.open("worldcitiespop_fixed.csv");
-    file2.open("insertion_time.dat");
-
     //file.open("mini.csv");
     string line;
     string word;
     string temp;
     int ctr = 0;
-
 
     PR_QUADTREE cities;
 
@@ -679,19 +670,35 @@ int main(int argc, char **argv) {
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
-        auto start = chrono::steady_clock::now();
         cities.insert(city->geoPointX, city->geoPointY, city);
-        auto end = chrono::steady_clock::now();
-        file2 << std::setprecision(10) << chrono::duration_cast<chrono::nanoseconds>(end - start).count()/1e6 << endl;
 
         ctr++;
 
     }
 
-    cout << cities._maxDepth << endl;
-
     file.close();
-    file2.close();
+
+    // datos de histograma para graficar
+    double sub  = 1.0;
+    double subX = 180*sub;
+    double subY = 360*sub;
+    unsigned long long temp2 = 0, temp3 = 0;
+    file.open("citiesPerRegion_180x360.txt");
+
+    for(int i=0; i<subX; i++){
+        for(int j=0; j<subY; j++){
+            temp2 = cities.cities_in_region( cities._x + i*cities._w/(subX),
+                                             cities._y + j*cities._h/(subY),
+                                             cities._w/(subX),
+                                             cities._h/(subY) );
+
+            file << i << "," << j << "," << temp2 << endl;
+            temp3 += temp2;
+            //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
+        }
+        cout << i << " " << " " << temp2 << endl;
+    }
+    file.close();
 
     //while(1){}
 
