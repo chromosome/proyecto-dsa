@@ -36,6 +36,7 @@ class quad_tree
 
 	node* root = nullptr;
 
+
 	/* Subdivide --------------------------------------------------------------
 	 */
 	tuple<node*, quad_t, quad_enum> subdivide(node* n, quad_t q, point_t p) {
@@ -44,6 +45,7 @@ class quad_tree
 
 		return { n->get_child(t), s, t };
 	}
+
 
 	/*  Search ----------------------------------------------------------------
 	 */
@@ -69,6 +71,7 @@ class quad_tree
 			return false;
 	}
 
+
 	/*  Search ----------------------------------------------------------------
 	 */
 	bool search(point_t p, function<void(node*, quad_enum)> f = nullptr) {
@@ -92,6 +95,7 @@ class quad_tree
 		else
 			return false;
 	}
+
 
 	/*  BFS -------------------------------------------------------------------
 	 */
@@ -120,6 +124,7 @@ class quad_tree
 		}
 	}
 
+
 	/*  Region Search ---------------------------------------------------------
 	 */
 	void region_search(quad_t z, function<void(node*, quad_t)> f) {
@@ -141,6 +146,7 @@ class quad_tree
 		bfs(func);
 	}
 
+
 	/*  Region Search ---------------------------------------------------------
 	 */
 	void region_search_grey(quad_t z, function<void(node*, quad_t)> f) {
@@ -161,6 +167,34 @@ class quad_tree
 		bfs(func);
 	}
 
+
+	/*  Region Search ---------------------------------------------------------
+	 */
+	void region_search_all(quad_t z, 
+						   function<void(node*, quad_t)> f  = nullptr,
+						   function<void(node*, quad_t)> fb = nullptr,
+						   function<void(node*, quad_t)> fg = nullptr, 
+						   function<void(node*, quad_t)> fw = nullptr) {
+		auto func = 
+			[z, &f, &fb, &fg, &fw] (node* n, quad_t q) {
+				f(n, q);
+				if ((n != nullptr) && intersects(q, z)) {
+
+					if ((n->get_color() == node::BLACK)) {
+						// fb(n, q);
+						return false;
+					}
+
+					// fg(n, q);
+					return true;
+				}
+				// fw(n, q);
+				return false;
+			};
+
+		bfs(func);
+	}
+
 public:
 
 	/*  Constructor -----------------------------------------------------------
@@ -171,6 +205,7 @@ public:
 		for (auto& record: _data)
 			insert(record);
 	}
+
 
 	/*  Find ------------------------------------------------------------------
 	 */
@@ -192,6 +227,7 @@ public:
 			return {};
 	}
 
+
 	/*  Descend ---------------------------------------------------------------
 	 */
 	node* descend(point_t p) {
@@ -201,6 +237,7 @@ public:
 		return m;
 	}
 
+
 	/*  Depth -----------------------------------------------------------------
 	 */
 	int depth(point_t p) {
@@ -209,6 +246,7 @@ public:
 		search(p, func);
 		return d;
 	}
+
 
 	/*  Track -----------------------------------------------------------------
 	 */
@@ -223,6 +261,7 @@ public:
 		search(p, func);
 		return path;
 	}
+
 
 	/*  Get Total Population --------------------------------------------------
 	 */
@@ -239,6 +278,7 @@ public:
 		return total_population;
 	}
 
+
 	/*  Get Total Cities ------------------------------------------------------
 	 */
 	unsigned long get_total_cities(quad_t z) {
@@ -253,6 +293,7 @@ public:
 		region_search(z, func);
 		return total_cities;
 	}
+
 
 	/*  Get Max Depth ---------------------------------------------------------
 	 */
@@ -273,6 +314,31 @@ public:
 		region_search(z, func);
 		return max_depth;
 	}
+
+
+	/*	Node Count ------------------------------------------------------------
+	 */
+	tuple<size_t, size_t, size_t> node_count(quad_t z = {}) {
+		if (z == quad_t({}))
+			z = origin;
+
+		tuple<size_t, size_t, size_t> count;
+
+		auto func = 
+			[&count, z] (node* n, quad_t q) {
+				auto& [w, g, b] = count;
+				if (n == nullptr)
+					w++;
+				else if (n->get_color() == node::GREY)
+					g++;
+				else if (n->get_color() == node::BLACK)
+					b++;
+			};
+
+		region_search_all(z, func);
+		return count;
+	}
+
 
 	/*  Get Depth Histogram ---------------------------------------------------
 	 */
@@ -296,9 +362,10 @@ public:
 		return histogram;
 	}
 
+
 	/*  Get Histogram 2D ----------------------------------------------------------
 	 */
-	vector<tuple<int, int, unsigned long>> histogram2d(int rx, int ry) {
+	vector<tuple<int, int, unsigned long>> get_depth_histogram2d(int rx, int ry) {
 		auto [p, d] = origin;
 		auto [dx, dy] = d;
 		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
@@ -316,6 +383,7 @@ public:
 		return hist;
 	}
 
+
 	/*  In Order Walk --------------------------------------------------------
 	 */
 	void inorder_walk() {
@@ -331,6 +399,7 @@ public:
 		cout << ")";
 	}
 
+
 	/*  Insert ----------------------------------------------------------------
 	 */
 	bool insert(data_t d) {
@@ -344,6 +413,7 @@ public:
 
 		return false;
 	}
+
 
 	/*  Insert ----------------------------------------------------------------
 	 */

@@ -49,29 +49,13 @@ int main(int argc, char const *argv[])
 		cout << k << ": " << v << endl;
 	cout << endl;
 
-	qtree.get_histogram2d(4, 4);
+	qtree.get_depth_histogram2d(4, 4);
 
-	// operaciones entre cuadrantes -------------------------------------------
-	dsa::quad_t z = {{0, 0}, {2, 2}};
-	dsa::quad_t x = {{3, 3}, {2, 2}};
-
-	// interseccion
-	cout << get_zone(x) << " y " << get_zone(z) << " ";
-	if (intersects(x, z))
-		cout << "intersectan" << endl;
-	else
-		cout << "no intersectan" << endl;
-
-	// z contiene x
-	// x = {{0, 0}, {1, 1}};
-	// z = {{0, 0}, {2, 2}};
-	// x = {{0, 0}, {2, 2}};
-	// z = {{0, 0}, {1, 1}};
-
-	if (intersects(x, z))
-		cout << get_zone(z) << " contiene a " << get_zone(x) << endl;
-	else
-		cout << get_zone(z) << " no contiene a " << get_zone(x) << endl;
+	// Conteo de nodos --------------------------------------------------------
+	auto [w, g, b] = qtree.node_count();
+	cout << "blancos: " << w << endl;
+	cout << "grises: "  << g << endl;
+	cout << "negros: "  << b << endl;
 
 	return 0;
 }

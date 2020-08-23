@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import make_interp_spline, BSpline
 
 def read_data(filename):
-	data = np.genfromtxt(filename)
+	data = np.genfromtxt(filename, delimiter=',')
 	return data
 
 def plot(name, title, programs, x_label='n', y_label='Tiempo [ms]', 
@@ -31,7 +31,7 @@ def plot(name, title, programs, x_label='n', y_label='Tiempo [ms]',
 	ax.set_yscale(y_scale)
 
 	plt.legend(loc="upper left")
-	plt.savefig(name, bbox_inches='tight', transparent=True, dpi=200)
+	plt.savefig(name, bbox_inches='tight', transparent=True, dpi=300)
 	plt.show()
 
 
@@ -72,8 +72,15 @@ def hist(name, title, programs, x_label='n', y_label='Tiempo [ms]'):
 
 
 if __name__ == '__main__':
-	plot('insertion_time', 
-		 'insertion_time', 
-		 {'insertion_time': 'PR-Quad Tree'},
+	# plot('insertion_time', 
+	# 	 'insertion_time', 
+	# 	 {'insertion_time': 'PR-Quad Tree'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
+
+	plot('insertion_depth', 
+		 'insertion_depth', 
+		 {'insertion_depth': 'PR-Quad Tree'},
 		 interp=1,
-		 x_scale='linear')
+		 x_scale='linear'
+		 )

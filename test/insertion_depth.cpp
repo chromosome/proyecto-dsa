@@ -6,7 +6,7 @@ using namespace std;
 using namespace dsa;
 
 void insertion_time(string filename) {
-	quad_tree tree(2000000.0, 2000000.0);
+	quad_tree tree(90.0, 180.0);
 
 	ifstream input(filename);
 	string line;
@@ -29,8 +29,14 @@ void insertion_time2(string filename) {
 
 	auto data = read_data(filename);
 
-	for (const auto& record: data)
-		profile([&tree, record] { tree.insert(record); });
+	double d = 0.;
+	for (const auto& record: data) {
+		if (tree.insert(record)) {
+			d += tree.depth(record.first);
+			d /= tree.size();
+			cout << d << endl;
+		}
+	}
 }
 
 int main(int argc, char const *argv[])
