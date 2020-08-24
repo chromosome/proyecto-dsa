@@ -45,10 +45,10 @@ class PR_QUADTREE {
         double _h;
         int _totalPoints                        =  0;
         unsigned long long _totalPopulation     =  0;
-        double _medium_depth                    =  1.0;
         int _total_blacks                       =  0;
         int _total_whites                       =  1;
         int _total_greys                        =  0;
+        double _medium_depth                    =  1.0;
 
         PR_QUADTREE(double, double, double, double);
         ~PR_QUADTREE();
@@ -165,6 +165,7 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
     // se prueba la preexistencia de una ciudad en el mismo punto (en ese caso se ignora)
     // (search_node solo puede devolver nodos blancos o negros, nunca NULL ;D)
     NODE* node = search_node(x,y);
+    int totalNodes;
 
     // si existe una ciudad en la misma posicion se evita el insert
     if( node->color == 'b' && x == node->data->geoPointX && y == node->data->geoPointY){
@@ -177,8 +178,11 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
 
     } else {
 
-        // se aumenta la poblacion total del quadtree
+        // se aumenta la poblacion total del quadtree y el contador de puntos del quadtree
         _totalPopulation += city->population;
+        _totalPoints++;
+        totalNodes = _total_blacks + _total_greys + _total_whites;
+        _medium_depth = (_medium_depth*(totalNodes - 1) + (1.0*node->depth) ) / totalNodes;
 
         // el cuadrante ya contiene un punto? es decir hay colision en el nodo?
 
@@ -188,10 +192,13 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
             node->color = 'b';
             _total_whites -= 1;
             _total_blacks += 1;
-            // ######### cambiar profundidad promedio
 
         // SI hay colision
         } else if (node->color == 'b'){
+
+            // cambiar profundidad promedio
+            totalNodes = _total_blacks + _total_greys + _total_whites;
+            _medium_depth = (_medium_depth*(totalNodes - 1) - (1.0*node->depth) ) / totalNodes;
 
             // se debe mover el punto antiguo a un nuevo nodo hijo
             CITY* oldCity = node->data;
@@ -200,7 +207,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
             node->data = NULL;
             node->color = 'g';
             _total_blacks -= 1;
-            // ######### cambiar profundidad promedio
 
             int cuadrante1 = 1;
             int cuadrante2 = 1;
@@ -216,7 +222,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->color = 'g';
                 //_total_blacks -= 1;
                 _total_greys += 1;
-                // ######### cambiar profundidad promedio
 
                 // se comprueba en que subcuadrante se encuentra cada punto
 
@@ -308,7 +313,9 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->h = temp->h/2;
 
                 _total_whites += 4;
-                // ##### cambiar profundidad promedio
+
+                totalNodes = _total_blacks + _total_greys + _total_whites;
+                _medium_depth = (_medium_depth*(totalNodes - 4) + (4.0*temp->first->depth) ) / totalNodes;
 
                 // condicion de termino para creacion de subnodos
                 // cuando ambos puntos no estan en el mismo cuadrante
@@ -354,15 +361,14 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
                 temp->fourth->color = 'b';
                 temp->fourth->data = oldCity;
             }
+
+            // cambiar profundidad promedio y contadores de nodos :D
             _total_whites -= 2;
             _total_blacks += 2;
-            // cambiar profundidad promedio
+            _medium_depth = (_medium_depth*(totalNodes - 2) + 2.0*(temp->depth + 1)) / totalNodes;
 
         }
     }
-
-    // se aumenta el contador de puntos del quadtree
-    _totalPoints++;
 
     return(true);
 
@@ -435,7 +441,7 @@ int PR_QUADTREE::remove(double x, double y){
             father->fourth  = NULL;
             father->color   = 'w';
             _total_whites  -= 4;
-            _total_grey    -= 1;
+            _total_greys    -= 1;
             _total_whites  += 1;
             // ########cambiar profundidad promedio
             node = father; // para siguiente iteracion
@@ -710,7 +716,7 @@ int main(int argc, char **argv) {
     fstream file;
     fstream file2;
     file.open("worldcitiespop_fixed.csv");
-    file2.open("profundidad_promedio_por_insert.txt");
+    file2.open("datos_por_insert.txt");
     string line;
     string word;
     string temp;
@@ -763,7 +769,7 @@ int main(int argc, char **argv) {
                        cities._total_greys  << "," <<
                        cities._medium_depth << endl;
         }
-
+//cout <<cities._medium_depth << endl;
         ctr++;
     }
 
