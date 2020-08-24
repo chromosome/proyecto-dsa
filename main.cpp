@@ -8,6 +8,7 @@ using namespace quadrant;
 
 int main(int argc, char const *argv[])
 {
+	cout << sizeof(dsa::node) << endl;
 	string filename;
 	if (argc > 1)
 		filename = argv[1];
@@ -39,7 +40,7 @@ int main(int argc, char const *argv[])
 
 	cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
 
-	cout << "total population: " << qtree.get_total_population(q) << endl;
+	cout << "total population: " << qtree.get_total_population(q) << endl << endl;
 
 	cout << "max depth: " << qtree.get_max_depth() << endl << endl;
 
@@ -58,6 +59,7 @@ int main(int argc, char const *argv[])
 	cout << "negros: "  << b << endl;
 	cout << "grises: "  << g << endl;
 	cout << "blancos: " << w << endl;
+
 
 	return 0;
 }

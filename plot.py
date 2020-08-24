@@ -6,7 +6,7 @@ def read_data(filename):
 	data = np.genfromtxt(filename, delimiter=',')
 	return data
 
-def plot(name, title, programs, x_label='n', y_label='Tiempo [ms]', 
+def plot(name, title, programs, references=dict(), x_label='n', y_label='Tiempo [ms]', 
 		 samples=None, interp=2, x_scale='log', y_scale='linear', 
 		 x_lim=None, y_lim=None):
 	path = 'results/'
@@ -21,6 +21,10 @@ def plot(name, title, programs, x_label='n', y_label='Tiempo [ms]',
 		# y = spline(x)
 		ax.plot(data, label=programs[program])
 
+	for l, f in references.items():
+		x = len(data)
+		ax.plot(f(np.arange(1, x)), label=l)
+
 	ax.set_xlabel(x_label)
 	ax.set_ylabel(y_label)
 	if x_lim:
@@ -30,7 +34,7 @@ def plot(name, title, programs, x_label='n', y_label='Tiempo [ms]',
 	ax.set_xscale(x_scale)
 	ax.set_yscale(y_scale)
 
-	plt.legend(loc="upper left")
+	plt.legend(loc="best")
 	plt.savefig(name, bbox_inches='tight', transparent=True, dpi=300)
 	plt.show()
 
@@ -74,15 +78,17 @@ def hist(name, title, programs, x_label='n', y_label='Tiempo [ms]'):
 if __name__ == '__main__':
 	# plot('insertion_time', 
 	# 	 'insertion_time', 
-	# 	 {'insertion_time': 'PR-Quad Tree'},
+	# 	 {'insertion_time': 'inserción'},
+	# 	 # references= { 'log4(x)' : (lambda x: 0.5*np.log2((3*x+1)/4)) },
 	# 	 interp=1,
 	# 	 x_scale='linear')
 
-	# plot('insertion_depth', 
-	# 	 'insertion_depth', 
-	# 	 {'insertion_depth': 'PR-Quad Tree'},
-	# 	 interp=1,
-	# 	 x_scale='linear')
+	plot('insertion_depth', 
+		 'Profundidad Promedio', 
+		 {'insertion_depth': 'Profundidad ponderada'},
+		 y_label='Profundidad',
+		 interp=1,
+		 x_scale='linear')
 
 	# plot('ocuppancy', 
 	# 	 'ocuppancy', 
@@ -96,9 +102,9 @@ if __name__ == '__main__':
 	# 	 interp=1,
 	# 	 x_scale='linear')
 
-	plot('region_query_time', 
-		 'region_query_time', 
-		 {'region_query_time': 'PR-Quad Tree'},
-		 interp=1,
-		 x_scale='linear')
+	# plot('region_query_time', 
+	# 	 'region_query_time', 
+	# 	 {'region_query_time': 'PR-Quad Tree'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
 	

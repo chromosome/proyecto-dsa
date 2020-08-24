@@ -376,7 +376,7 @@ public:
 
 	/*  Get Average Depth -----------------------------------------------------
 	 */
-	size_t get_average_depth(quad_t z = {}) {
+	double get_average_depth(quad_t z = {}) {
 		if (z == quad_t{})
 			z = origin;
 

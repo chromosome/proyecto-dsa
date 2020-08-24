@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
 	except:
 		print("[Error] Archivo no encontrado.")
 	finally:
-		s = 2
+		s = 20
 		data = data[::-1,-1:].reshape(s*90, s*180)[:,::-1]
 		# data = data[::-1,-1:].reshape(1024, 1024)[:,::-1]
 
