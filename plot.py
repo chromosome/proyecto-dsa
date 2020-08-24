@@ -78,9 +78,27 @@ if __name__ == '__main__':
 	# 	 interp=1,
 	# 	 x_scale='linear')
 
-	plot('insertion_depth', 
-		 'insertion_depth', 
-		 {'insertion_depth': 'PR-Quad Tree'},
+	# plot('insertion_depth', 
+	# 	 'insertion_depth', 
+	# 	 {'insertion_depth': 'PR-Quad Tree'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
+
+	# plot('ocuppancy', 
+	# 	 'ocuppancy', 
+	# 	 {'ocuppancy': 'PR-Quad Tree'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
+
+	# plot('query_time', 
+	# 	 'query_time', 
+	# 	 {'query_time': 'PR-Quad Tree'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
+
+	plot('region_query_time', 
+		 'region_query_time', 
+		 {'region_query_time': 'PR-Quad Tree'},
 		 interp=1,
-		 x_scale='linear'
-		 )
+		 x_scale='linear')
+	

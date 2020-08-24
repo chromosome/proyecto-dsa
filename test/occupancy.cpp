@@ -5,24 +5,19 @@
 using namespace std;
 using namespace dsa;
 
-void insertion_depth(string filename) {
+void ocuppancy(string filename) {
 	quad_tree tree(90.0, 180.0);
 
 	auto data = read_data(filename);
 
-	double avrg_depth = 0;
-	int inserted = 0;
-	int interval = 20000;
+	int interval = 10000;
+	int i = 1;
 	for (const auto& record: data) {
-
 		if (tree.insert(record)) {
-			inserted++;
-
-			avrg_depth += tree.depth(record.first);
-
-			if (inserted%interval == 0) {
-				cout << avrg_depth/interval << endl;
-				avrg_depth = 0;
+			if (i%interval == 0) {
+				auto [w, g, b] = tree.node_count();
+				cout << w << "," << g << "," << b << endl;
+				++i;
 			}
 		}
 	}
@@ -38,7 +33,7 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	insertion_depth(filename);
+	ocuppancy(filename);
 
 	return 0;
 }

@@ -74,6 +74,31 @@ class quad_tree
 
 	/*  Search ----------------------------------------------------------------
 	 */
+	bool search(point_t p, function<void(node*, quad_t)> f = nullptr) {
+		if (f == nullptr)
+			f = [](node* n, quad_t q){};
+
+		node* current = root;
+		quad_t q = origin;
+
+		while ((current != nullptr) && (current->get_color() == node::GREY)) {
+			f(current, q);
+
+			quad_enum t;
+			tie(current, q, t) = subdivide(current, q, p);
+		}
+
+		if (current != nullptr) {
+			f(current, q);
+			return true;
+		}
+		else
+			return false;
+	}
+
+
+	/*  Search ----------------------------------------------------------------
+	 */
 	bool search(point_t p, function<void(node*, quad_enum)> f = nullptr) {
 		if (f == nullptr)
 			f = [](node* n, quad_enum t){};
@@ -94,6 +119,41 @@ class quad_tree
 		}
 		else
 			return false;
+	}
+
+
+	/*  Search ----------------------------------------------------------------
+	 */
+	bool search(point_t p, function<void(node*, quad_t, quad_enum)> fb = nullptr,
+						   function<void(node*, quad_t, quad_enum)> fg = nullptr,
+						   function<void(node*, quad_t, quad_enum)> fw = nullptr) {
+
+		if (fb == nullptr)
+			fb = [](node* n, quad_t q, quad_enum t){};
+		if (fg == nullptr)
+			fg = [](node* n, quad_t q, quad_enum t){};
+		if (fw == nullptr)
+			fw = [](node* n, quad_t q, quad_enum t){};
+
+		node* current = root;
+		quad_t q = origin;
+		quad_enum t = ORIGIN;
+
+		while ((current != nullptr) && (current->get_color() == node::GREY)) {
+
+			fg(current, q, t);
+
+			tie(current, q, t) = subdivide(current, q, p);
+		}
+
+		if (current != nullptr) {
+			fb(current, q, t);
+			return true;
+		}
+		else {
+			fw(current, q, t);
+			return false;
+		}
 	}
 
 
@@ -127,68 +187,30 @@ class quad_tree
 
 	/*  Region Search ---------------------------------------------------------
 	 */
-	void region_search(quad_t z, function<void(node*, quad_t)> f) {
+	void region_search(quad_t z, function<void(node*, quad_t)> fb = nullptr,
+								 function<void(node*, quad_t)> fg = nullptr, 
+								 function<void(node*, quad_t)> fw = nullptr) {
+		if (fb == nullptr)
+			fb = [](node* n, quad_t t){};
+		if (fg == nullptr)
+			fg = [](node* n, quad_t t){};
+		if (fw == nullptr)
+			fw = [](node* n, quad_t t){};
+
 		auto func = 
-			[z, &f] (node* n, quad_t q) {
+			[z, &fb, &fg, &fw] (node* n, quad_t q) {
 				if ((n != nullptr) && intersects(q, z)) {
 
 					if ((n->get_color() == node::BLACK)) {
-
-						f(n, q);
-
-						return false;
-					}
-					return true;
-				}
-				return false;
-			};
-
-		bfs(func);
-	}
-
-
-	/*  Region Search ---------------------------------------------------------
-	 */
-	void region_search_grey(quad_t z, function<void(node*, quad_t)> f) {
-		auto func = 
-			[z, &f] (node* n, quad_t q) {
-				if ((n != nullptr) && intersects(q, z)) {
-
-					if ((n->get_color() == node::BLACK)) {
+						fb(n, q);
 						return false;
 					}
 
-					f(n, q);
+					fg(n, q);
 					return true;
 				}
-				return false;
-			};
 
-		bfs(func);
-	}
-
-
-	/*  Region Search ---------------------------------------------------------
-	 */
-	void region_search_all(quad_t z, 
-						   function<void(node*, quad_t)> f  = nullptr,
-						   function<void(node*, quad_t)> fb = nullptr,
-						   function<void(node*, quad_t)> fg = nullptr, 
-						   function<void(node*, quad_t)> fw = nullptr) {
-		auto func = 
-			[z, &f, &fb, &fg, &fw] (node* n, quad_t q) {
-				f(n, q);
-				if ((n != nullptr) && intersects(q, z)) {
-
-					if ((n->get_color() == node::BLACK)) {
-						// fb(n, q);
-						return false;
-					}
-
-					// fg(n, q);
-					return true;
-				}
-				// fw(n, q);
+				fw(n, q);
 				return false;
 			};
 
@@ -248,6 +270,19 @@ public:
 	}
 
 
+	/*  Depth -----------------------------------------------------------------
+	 */
+	int depth(point_t p, quad_t q) {
+		double d;
+		auto func = 
+			[q, &d, this] (node* n) { 
+				d = ceil(log2(get<0>(origin.second)/get<0>(q.second))); 
+			};
+		search(p, func);
+		return d;
+	}
+
+
 	/*  Track -----------------------------------------------------------------
 	 */
 	vector<quad_enum> track(point_t p) {
@@ -295,20 +330,43 @@ public:
 	}
 
 
+	// /*  Get Max Depth ---------------------------------------------------------
+	//  */
+	// size_t get_max_depth(quad_t z = {}) {
+	// 	if (z == quad_t{})
+	// 		z = origin;
+
+	// 	double max_depth = 0.;
+
+	// 	auto func = 
+	// 		[&max_depth, z] (node* n, quad_t q) { 
+
+	// 			double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)));
+
+	// 			max_depth = (max_depth > depth) ? max_depth : depth;
+	// 		};
+
+	// 	region_search(z, func);
+	// 	return max_depth;
+	// }
+
+
 	/*  Get Max Depth ---------------------------------------------------------
 	 */
 	size_t get_max_depth(quad_t z = {}) {
-		if (z == quad_t({}))
+		if (z == quad_t{})
 			z = origin;
 
-		double max_depth = 0.;
+		size_t max_depth = 0;
 
 		auto func = 
-			[&max_depth, z] (node* n, quad_t q) { 
+			[&max_depth, z, this] (node* n, quad_t q) {
 
-				double depth = ceil(log2(get<0>(z.second)/get<0>(q.second)));
+				// if (contains(n->get_point(), z)) {
 
-				max_depth = (max_depth > depth) ? max_depth : depth;
+					size_t d = depth(n->get_point(), q);
+					max_depth = (max_depth > d) ? max_depth : d;
+				// }
 			};
 
 		region_search(z, func);
@@ -316,34 +374,49 @@ public:
 	}
 
 
+	/*  Get Average Depth -----------------------------------------------------
+	 */
+	size_t get_average_depth(quad_t z = {}) {
+		if (z == quad_t{})
+			z = origin;
+
+		double average_depth = 0;
+
+		auto func = 
+			[&average_depth, z, this] (node* n, quad_t q) {
+
+				if (contains(n->get_point(), z))					
+					average_depth += depth(n->get_point(), q);
+			};
+
+		region_search(z, func);
+		return average_depth/size_;
+	}
+
+
 	/*	Node Count ------------------------------------------------------------
 	 */
 	tuple<size_t, size_t, size_t> node_count(quad_t z = {}) {
-		if (z == quad_t({}))
+		if (z == quad_t{})
 			z = origin;
 
-		tuple<size_t, size_t, size_t> count;
+		size_t b = 0;
+		size_t g = 0;
+		size_t w = 0;
 
-		auto func = 
-			[&count, z] (node* n, quad_t q) {
-				auto& [w, g, b] = count;
-				if (n == nullptr)
-					w++;
-				else if (n->get_color() == node::GREY)
-					g++;
-				else if (n->get_color() == node::BLACK)
-					b++;
-			};
+		auto funcb = [&b, z] (node* n, quad_t q) { b++; };
+		auto funcg = [&g, z] (node* n, quad_t q) { g++; };
+		auto funcw = [&w, z] (node* n, quad_t q) { w++; };
 
-		region_search_all(z, func);
-		return count;
+		region_search(z, funcb, funcg, funcw);
+		return {b, g, w};
 	}
 
 
 	/*  Get Depth Histogram ---------------------------------------------------
 	 */
 	map<size_t, size_t> get_depth_histogram(quad_t z = {}) {
-		if (z == quad_t({}))
+		if (z == quad_t{})
 			z = origin;
 
 		map<size_t, size_t> histogram;
@@ -363,7 +436,7 @@ public:
 	}
 
 
-	/*  Get Histogram 2D ----------------------------------------------------------
+	/*  Get Depth Histogram 2D ------------------------------------------------
 	 */
 	vector<tuple<int, int, unsigned long>> get_depth_histogram2d(int rx, int ry) {
 		auto [p, d] = origin;
@@ -375,8 +448,47 @@ public:
 		for (int i = 0; i < rx; ++i) {
 			for (int j = 0; j < ry; ++j) {
 				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
-				// cout << z << endl;
 				hist.push_back({i, j, get_max_depth(z)});
+			}
+		}
+
+		return hist;
+	}
+
+
+	/*  Get Population Histogram 2D -------------------------------------------
+	 */
+	vector<tuple<int, int, unsigned long>> get_population_histogram2d(int rx, int ry) {
+		auto [p, d] = origin;
+		auto [dx, dy] = d;
+		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
+
+		vector<tuple<int, int, unsigned long>> hist;
+
+		for (int i = 0; i < rx; ++i) {
+			for (int j = 0; j < ry; ++j) {
+				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
+				hist.push_back({i, j, get_total_population(z)});
+			}
+		}
+
+		return hist;
+	}
+
+
+	/*  Get Cities Histogram 2D -----------------------------------------------
+	 */
+	vector<tuple<int, int, unsigned long>> get_cities_histogram2d(int rx, int ry) {
+		auto [p, d] = origin;
+		auto [dx, dy] = d;
+		auto [dxr, dyr] = dist_t{dx/rx, dy/ry};
+
+		vector<tuple<int, int, unsigned long>> hist;
+
+		for (int i = 0; i < rx; ++i) {
+			for (int j = 0; j < ry; ++j) {
+				quad_t z = {{2*dxr*i-dx+dxr, 2*dyr*j-dy+dyr}, {dxr, dyr}};
+				hist.push_back({i, j, get_total_cities(z)});
 			}
 		}
 

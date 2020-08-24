@@ -19,8 +19,8 @@ int main(int argc, char const *argv[])
 	// insercion --------------------------------------------------------------
 	dsa::quad_tree qtree(90., 180., read_data(filename));
 
-	int s = 5;
-	auto hist = qtree.get_depth_histogram2d(s*90., s*180.);
+	int s = 2;
+	auto hist = qtree.get_population_histogram2d(s*90., s*180.);
 	// auto hist = qtree.get_histogram2d(s, s);
 
 	for (const auto& t: hist)

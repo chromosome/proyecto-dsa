@@ -64,7 +64,7 @@ bool contains(point_t p, quad_t q) {
 	auto [xmin, xmax, ymin, ymax] = get_zone(q);
 	auto [px, py] = p;
 
-	if (px >= xmin && px <= xmax && py >= ymin && py <= ymax)
+	if (px > xmin && px <= xmax && py > ymin && py <= ymax)
 		return true;
 	else
 		return false;

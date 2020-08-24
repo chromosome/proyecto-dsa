@@ -13,12 +13,12 @@ if len(sys.argv) > 1:
 	finally:
 		s = 30
 		print(data.shape)
-		# data = data.reshape(s, 2)
+		# data = data.reshape(2, s)
 
 		fig, ax = plt.subplots()
 		# ax.plot(data)
 
-		N, bins, patches = ax.hist(data, 32)
+		ax.bar(data[:,0], data[:,1])
 		plt.yscale('log')
 
 		name = filename.split('.')[0]

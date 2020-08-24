@@ -39,9 +39,11 @@ int main(int argc, char const *argv[])
 
 	cout << "total cities: " << qtree.get_total_cities(q) << endl << endl;
 
-	cout << "total population: " << qtree.get_total_population(q) << endl << endl;
+	cout << "total population: " << qtree.get_total_population(q) << endl;
 
 	cout << "max depth: " << qtree.get_max_depth() << endl << endl;
+
+	cout << "average depth: " << qtree.get_average_depth() << endl << endl;
 
 	// histograma -------------------------------------------------------------
 	auto h = qtree.get_depth_histogram();
@@ -52,10 +54,10 @@ int main(int argc, char const *argv[])
 	qtree.get_depth_histogram2d(4, 4);
 
 	// Conteo de nodos --------------------------------------------------------
-	auto [w, g, b] = qtree.node_count();
-	cout << "blancos: " << w << endl;
-	cout << "grises: "  << g << endl;
+	auto [b, g, w] = qtree.node_count();
 	cout << "negros: "  << b << endl;
+	cout << "grises: "  << g << endl;
+	cout << "blancos: " << w << endl;
 
 	return 0;
 }

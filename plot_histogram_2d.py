@@ -7,11 +7,11 @@ if len(sys.argv) > 1:
 	filename = sys.argv[1]
 
 	try:
-		data = np.genfromtxt(filename, dtype=np.uint8, delimiter=',');
+		data = np.genfromtxt(filename, delimiter=',');
 	except:
 		print("[Error] Archivo no encontrado.")
 	finally:
-		s = 5
+		s = 2
 		data = data[::-1,-1:].reshape(s*90, s*180)[:,::-1]
 		# data = data[::-1,-1:].reshape(1024, 1024)[:,::-1]
 
