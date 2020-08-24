@@ -41,6 +41,7 @@ plt.xlabel("Nodos Insertados")
 plt.ylabel("Total de Nodos por Tipo")
 plt.legend()
 plt.show()
+#plt.savefig("hola1", dpi=300)
 
 
 
@@ -51,6 +52,7 @@ plt.xlabel("Nodos Insertados")
 plt.ylabel("Profundidad Promedio")
 plt.legend()
 plt.show()
+plt.dpi(300)
 
 
 

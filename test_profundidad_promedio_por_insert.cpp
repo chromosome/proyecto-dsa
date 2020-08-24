@@ -165,7 +165,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
     // se prueba la preexistencia de una ciudad en el mismo punto (en ese caso se ignora)
     // (search_node solo puede devolver nodos blancos o negros, nunca NULL ;D)
     NODE* node = search_node(x,y);
-    int totalNodes;
 
     // si existe una ciudad en la misma posicion se evita el insert
     if( node->color == 'b' && x == node->data->geoPointX && y == node->data->geoPointY){
@@ -181,8 +180,7 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
         // se aumenta la poblacion total del quadtree y el contador de puntos del quadtree
         _totalPopulation += city->population;
         _totalPoints++;
-        totalNodes = _total_blacks + _total_greys + _total_whites;
-        _medium_depth = (_medium_depth*(totalNodes - 1) + (1.0*node->depth) ) / totalNodes;
+        _medium_depth = (_medium_depth*(_totalPoints - 1) + (1.0*node->depth) ) / _totalPoints;
 
         // el cuadrante ya contiene un punto? es decir hay colision en el nodo?
 
@@ -197,8 +195,7 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
         } else if (node->color == 'b'){
 
             // cambiar profundidad promedio
-            totalNodes = _total_blacks + _total_greys + _total_whites;
-            _medium_depth = (_medium_depth*(totalNodes - 1) - (1.0*node->depth) ) / totalNodes;
+            _medium_depth = (_medium_depth*(_totalPoints - 1) - (1.0*node->depth)) / _totalPoints;
 
             // se debe mover el punto antiguo a un nuevo nodo hijo
             CITY* oldCity = node->data;
@@ -314,9 +311,6 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
 
                 _total_whites += 4;
 
-                totalNodes = _total_blacks + _total_greys + _total_whites;
-                _medium_depth = (_medium_depth*(totalNodes - 4) + (4.0*temp->first->depth) ) / totalNodes;
-
                 // condicion de termino para creacion de subnodos
                 // cuando ambos puntos no estan en el mismo cuadrante
                 if(cuadrante1 != cuadrante2){
@@ -365,7 +359,7 @@ bool PR_QUADTREE::insert(double x, double y, CITY* city){
             // cambiar profundidad promedio y contadores de nodos :D
             _total_whites -= 2;
             _total_blacks += 2;
-            _medium_depth = (_medium_depth*(totalNodes - 2) + 2.0*(temp->depth + 1)) / totalNodes;
+            _medium_depth = (_medium_depth*(_totalPoints - 2) + 2.0*(temp->depth + 1)) / _totalPoints;
 
         }
     }

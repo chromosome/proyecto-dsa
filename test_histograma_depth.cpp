@@ -679,7 +679,7 @@ int main(int argc, char **argv) {
     file.close();
 
     // datos de histograma para graficar
-    double sub  = 10.0;
+    double sub  = 20.0;
     double subX = 180*sub;
     double subY = 360*sub;
     unsigned long long temp2 = 0, temp3 = 0;
