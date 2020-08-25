@@ -390,8 +390,10 @@ int PR_QUADTREE::remove(double x, double y){
     NODE* father = NULL;
 
     // se comprueba la existencia de la ciudad
-    if(node == NULL)
+    if(node == NULL){
+        cout << "MIERDAAAAAAAAAA" << endl;
         return(1);
+    }
 
     // se borran los datos del nodo y se reinicia
     _totalPopulation -= node->data->population;
@@ -705,185 +707,24 @@ int PR_QUADTREE::depths_in_region_with_zone_driver(NODE* node, double rx, double
 
 int main(int argc, char **argv) {
 
-/*
-    // se crea un quad_tree para hacer pruebas
-    quad_tree qtree(256.0,256.0);
-
-    // puntos de prueba
-    data_t p1, p2, p3, p4, p5, p6, p7, p8;
-
-    //          x        y      dato
-    p1 = { {  128.0  , -128.0} ,  0};
-    p2 = { {  128.0  ,  128.0} ,  1};
-    p3 = { {  -16.0  ,   16.0} ,  2};
-    p4 = { {  -16.0  ,   48.0} ,  3};
-    p5 = { { -240.0  ,  240.0} ,  4};
-
-    // se inserta p1 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p1);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-
-    // se inserta p2 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p2);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-
-    // se inserta p3 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p3);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-    cout << "depth p3: " << qtree.depth(p3.first) << endl;
-
-    // se inserta p4 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p4);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-    cout << "depth p3: " << qtree.depth(p3.first) << endl;
-    cout << "depth p4: " << qtree.depth(p4.first) << endl;
-
-    // se inserta p5 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p5);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-    cout << "depth p3: " << qtree.depth(p3.first) << endl;
-    cout << "depth p4: " << qtree.depth(p4.first) << endl;
-    cout << "depth p5: " << qtree.depth(p5.first) << endl;
-
-    // se remueve p4 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.remove(p4.first);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-    cout << "depth p3: " << qtree.depth(p3.first) << endl;
-    //cout << "depth p4: " << qtree.depth(p4.first) << endl;
-    cout << "depth p5: " << qtree.depth(p5.first) << endl;
-
-    // se inserta p4 y se comprueba el estado del quadtree
-    cout << "///////////////////////////////////////////" << endl;
-    qtree.insert(p4);
-    cout << "total puntos en quadtree: " << qtree.size() << endl;
-    cout << "depth p1: " << qtree.depth(p1.first) << endl;
-    cout << "depth p2: " << qtree.depth(p2.first) << endl;
-    cout << "depth p3: " << qtree.depth(p3.first) << endl;
-    cout << "depth p4: " << qtree.depth(p4.first) << endl;
-    cout << "depth p5: " << qtree.depth(p5.first) << endl;
-
-
-
-    //std::cout << "\x1B[2J\x1B[H";
-
-
-	data_t* d = qtree.find(p1.first);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
-
-
-	d = qtree.find(p2.first);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
-
-	d = qtree.find(p3.first);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
-
-	d = qtree.find(p4.first);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
-
-	d = qtree.find(p5.first);
-	if (d)
-		cout << "found: " << d->first << ": " << d->second << endl << endl;
-	else
-		cout << "not found!" << endl << endl;
-
-
-    /*
-    string filename;
-
-    filename = "test2.csv";
-	quad_tree qtree(90.0,180.0,read_data(filename));
-
-	cout << "inserted: " << qtree.size() << endl << endl;
-
-    cout << endl;
-
-	// profundidad de puntos ------------------------------------------------
-	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
-	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
-	cout << "depth of " << "<-80.0, -80.0>" << ": " << qtree.depth({-80.0, -80.0}) << endl;
-	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
-
-	cout << endl;
-
-	// remove -----------------------------------------------------------------
-	if (qtree.remove({-80.0, -80.0}))
-		cout << "removed:" << "<-80.0, -80.0>" << endl << endl;
-
-	if(qtree.find({-80.0, -80.0}) == nullptr)
-        cout << "fue eliminado" << endl << endl;
-
-	// profundidad de puntos ------------------------------------------------
-	cout << "depth of " << "<-10.0, -10.0>" << ": " << qtree.depth({-10.0, -10.0}) << endl;
-	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
-	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
-	cout << endl;
-
-	// remove -----------------------------------------------------------------
-	if (qtree.remove({-10.0, -10.0}))
-		cout << "removed:" << "-10.0, -10.0" << endl << endl;
-
-	if(qtree.find({-10.0, -10.0}) == nullptr)
-        cout << "fue eliminado" << endl << endl;
-
-	// profundidad de puntos ------------------------------------------------
-	cout << "depth of " << "<10.0, 10.0>" << ": " << qtree.depth({10.0, 10.0}) << endl;
-	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
-	cout << endl;
-
-	// remove -----------------------------------------------------------------
-	if (qtree.remove({10.0, 10.0}))
-		cout << "removed:" << "10.0, 10.0" << endl << endl;
-
-    // profundidad de puntos ------------------------------------------------
-	cout << "depth of " << "<-80.2, -80.2>" << ": " << qtree.depth({-80.2, -80.2}) << endl;
-	cout << endl;
-
-
-*/
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
     // lectura de datos
     fstream file;
+    fstream file2;
     file.open("worldcitiespop_fixed.csv");
+    file2.open("datos_por_delete.txt");
+
     //file.open("mini.csv");
     string line;
     string word;
     string temp;
     int ctr = 0;
+
+    vector<double> posX;
+    vector<double> posY;
 
     PR_QUADTREE cities;
 
@@ -926,66 +767,27 @@ int main(int argc, char **argv) {
         city->geoPointY = stold(word);
 
         // se insertan los datos al quadtree
-        cities.insert(city->geoPointX, city->geoPointY, city);
-
-        ctr++;
-
-    }
-
-    file.close();
-
-    // pruebas insert
-    NODE* x = cities.search_node((double)8.3766667,(double)-78.9591667);
-    if(x != NULL)
-        cout << "existe la ciudad <8.3766667,-78.9591667>" << endl;
-    cout << "poblacion ciudad <8.3766667,-78.9591667>: " << x->data->population << endl;
-    cout << "profundidad nodo de ciudad <8.3766667,-78.9591667>: " << x->depth << endl;
-    cout << "total de ciudades en quadtree: " << cities._totalPoints << endl;
-    cout << "total de habitantes en quadtree: " << cities._totalPopulation << endl;
-    cout << "maxima profundidad de nodo en quadtree: " << cities.get_max_depth() << endl;
-
-    // pruebas region
-    double rx = 0.0;
-    double ry = 0.0;
-    double rw = 400.0;
-    double rh = 400.0;
-    cout << "busqueda por region -> ciudades en: " << cities.cities_in_region(rx, ry, rw, rh) << endl;
-    cout << "busqueda por region -> habitantes en: " << cities.population_in_region(rx, ry, rw, rh) << endl;
-
-    // pruebas remove
-
-    int flag = cities.remove((double)8.3766667,(double)-78.9591667);
-    if( flag == 0)
-        cout << "ciudad <8.3766667,-78.9591667> removida" << endl;
-    else if(flag == -1)
-        cout << "ciudad <8.3766667,-78.9591667> no existe" << endl;
-    x = cities.search_city((double)8.3766667,(double)-78.9591667);
-    if(x == NULL)
-       cout << "ya no existe la ciudad <8.3766667,-78.9591667> :C" << endl;
-
-
-    // datos de histograma para graficar
-    double sub  = 10.0;
-    double subX = 180*sub;
-    double subY = 360*sub;
-    unsigned long long temp2 = 0, temp3 = 0;
-    file.open("depthsPerRegion_1800x3600.txt");
-
-    for(int i=0; i<subX; i++){
-        for(int j=0; j<subY; j++){
-            temp2 = cities.depths_in_region( cities._x + i*cities._w/(subX),
-                                             cities._y + j*cities._h/(subY),
-                                             cities._w/(subX),
-                                             cities._h/(subY) );
-
-            file << i << "," << j << "," << temp2 << endl;
-            temp3 += temp2;
-            //cout << cities._x + i*cities._w/(sub) << " " << cities._y + j*cities._w/(sub) << " " << cities._w/(sub) << endl;
+        if(cities.insert(city->geoPointX, city->geoPointY, city)){
+            posX.push_back(city->geoPointX);
+            posY.push_back(city->geoPointY);
         }
-        cout << i << " " << " " << temp2 << endl;
+        ctr++;
     }
+
+    for(ctr = 0; ctr < posX.size(); ctr++){
+
+        if(cities.remove(posX[ctr],posY[ctr]))
+            cout << "OH NO!!!    " << ctr << endl;
+
+        //file2 << cities._total_blacks << "," << cities._total_greys << "," << cities._total_whites << endl;
+
+    }
+
+
+    //cout << cities._maxDepth << endl;
+
     file.close();
-    cout << endl << "histograma de maxima profundidad por region" << subX << "x" << subY << " " << temp3 << endl << endl;
+    file2.close();
 
     //while(1){}
 
