@@ -14,6 +14,7 @@ def plot(name, title, programs, references=dict(), x_label='n', y_label='Tiempo 
 	fig, ax = plt.subplots()
 	# fig.suptitle(title)
 	for program in programs:
+		print(program)
 		data = read_data(path+program+".dat")
 
 		# x = np.linspace(n.min(), n.max(), 1000)
@@ -83,12 +84,18 @@ if __name__ == '__main__':
 	# 	 interp=1,
 	# 	 x_scale='linear')
 
-	plot('insertion_depth', 
-		 'Profundidad Promedio', 
-		 {'insertion_depth': 'Profundidad ponderada'},
-		 y_label='Profundidad',
-		 interp=1,
-		 x_scale='linear')
+	# plot('insertion_depth', 
+	# 	 'Profundidad Promedio', 
+	# 	 {'insertion_depth': 'Profundidad ponderada'},
+	# 	 y_label='Profundidad',
+	# 	 interp=1,
+	# 	 x_scale='linear')
+
+	# plot('deletion_time', 
+	# 	 'Eliminación', 
+	# 	 {'deletion_time': 'Eliminación'},
+	# 	 interp=1,
+	# 	 x_scale='linear')
 
 	# plot('ocuppancy', 
 	# 	 'ocuppancy', 
@@ -102,9 +109,22 @@ if __name__ == '__main__':
 	# 	 interp=1,
 	# 	 x_scale='linear')
 
-	# plot('region_query_time', 
-	# 	 'region_query_time', 
-	# 	 {'region_query_time': 'PR-Quad Tree'},
+	plot('region_query_time', 
+		 'region_query_time', 
+		 {'region_query_time': 'Consultas por Región al Azar'},
+		 interp=1,
+		 x_scale='linear')
+
+	# plot('consultas por punto', 
+	# 	 'Consultas por Punto', 
+	# 	 {
+	# 	 	'insertion_time': 'Inserción',
+	# 	 	'insertion_time_random': 'Inserción al Azar',
+	# 	 	'deletion_time': 'Eliminación',
+	# 	 	'deletion_time_random': 'Eliminación al Azar',
+	# 	 	# 'query_time': 'Búsqueda',
+	# 	 	'query_time_random': 'Búsqueda al Azar'
+	# 	 },
 	# 	 interp=1,
 	# 	 x_scale='linear')
 	
