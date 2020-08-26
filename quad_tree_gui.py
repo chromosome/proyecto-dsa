@@ -20,50 +20,41 @@ pygame.display.set_caption('Deku Tree')
 
 screen.fill(Color_screen)
 pygame.display.flip()
+pygame.transform.flip(screen, False, False)
 
-tree = quad_tree.quad_tree(Screen_width, Screen_height)
+tree = quad_tree.quad_tree(Screen_width/2, Screen_height/2)
 points = []
 
 ###################################################################
 
 def draw_subdivision_driver(tracks, x, y, w, h):
 
-	# pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-	# pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
-
 	for track in tracks:
 
-		if track == "origin":
-			pass
-		elif(track == "NW"):
-			w = w/2
-			h = h/2
-			x = x
-			y = y
+		if track != 'ORIGIN':
 			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
 			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
+			print(x,y,w,h)
+
+		if(track == "NW"):
+			w = w/2
+			h = h/2
+
 		elif(track == "NE"):
 			w = w/2
 			h = h/2
 			x = x+w
-			y = y
-			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
+
 		elif(track == "SW"):
 			w = w/2
 			h = h/2
-			x = x
 			y = y+h
-			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
-			print(x,y,w,h)
+
 		elif(track == "SE"):
 			w = w/2
 			h = h/2
 			x = x+w
 			y = y+h
-			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
 
 		pygame.display.flip()
 
@@ -89,7 +80,7 @@ def mouseClicked(pos):
 	print(pos)
 	insert(pos[0], pos[1])
 	x = pos[0] - Screen_width/2
-	y = pos[1] - Screen_height/2
+	y = Screen_height/2 - pos[1]
 	print(x, y)
 	tree.insert(x, y)
 	tracks = tree.track(x, y)
