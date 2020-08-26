@@ -105,12 +105,13 @@ static PyObject* quad_tree_track(quad_tree* self, PyObject* args, PyObject* kwar
 static PyObject* quad_tree_region_search(quad_tree* self, PyObject* args, PyObject* kwargs) {
 	double lat;
 	double lon;
-	int d;
+	int dx;
+	int dy;
 
-	if (!PyArg_ParseTuple(args, "ddi", &lat, &lon, &d))
+	if (!PyArg_ParseTuple(args, "ddii", &lat, &lon, &dx, &dy))
 		return NULL;
 
-	dsa::quad_t q = {{lat, lon}, {d, d}};
+	dsa::quad_t q = {{lat, lon}, {dx, dy}};
 
 	long points = ((dsa::quad_tree*)(self->tree))->get_total_cities(q);
 
@@ -122,7 +123,7 @@ static PyMethodDef quad_tree_methods[] = {
 	{ "insert", (PyCFunction) quad_tree_insert, METH_VARARGS, "inserts a point"        },
 	{ "remove", (PyCFunction) quad_tree_remove, METH_VARARGS, "removes a point"        },
 	{ "track",  (PyCFunction) quad_tree_track,  METH_VARARGS, "tracks a point"         },
-	{ "region search",  (PyCFunction) quad_tree_region_search,  METH_VARARGS, "query area points"},
+	{ "region_search",  (PyCFunction) quad_tree_region_search,  METH_VARARGS, "query area points"},
 	{NULL}
 };
 
