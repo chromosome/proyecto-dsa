@@ -17,13 +17,13 @@ def rotate(origin, point, angle):
     qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
     return qx, qy
 
-import quad_tree
+#import quad_tree
 
 ###################################################################
 
-# data = np.genfromtxt("test.csv", 
-# 					 dtype=np.double, 
-# 					 delimiter=';', 
+# data = np.genfromtxt("test.csv",
+# 					 dtype=np.double,
+# 					 delimiter=';',
 # 					 skip_header=1,
 # 					 usecols=(5, 6),
 # 					 max_rows=20000)
@@ -33,17 +33,17 @@ import quad_tree
 data = np.empty((1,2),dtype=np.double)
 # print(data.shape)
 
-with open("worldcitiespop_fixed.csv") as f:
-	f.readline()
-	count = 0
-	for line in f:
-		line = line.strip().split(';')
-		line = line[7].split(',')
-		x, y = float(line[0]), float(line[1])
-		data = np.append(data, ((x, y),), axis=0)
-		count += 1
-		if count > 2000:
-			break
+#with open("worldcitiespop_fixed.csv") as f:
+#	f.readline()
+#	count = 0
+#	for line in f:
+#		line = line.strip().split(';')
+#		line = line[7].split(',')
+#		x, y = float(line[0]), float(line[1])
+#		data = np.append(data, ((x, y),), axis=0)
+#		count += 1
+#		if count > 2000:
+#			break
 
 def insert_data(tree, data):
 	for d in data:
@@ -57,7 +57,7 @@ def insert_data(tree, data):
 
 lat, lon = 90, 180
 # tree = quad_tree.quad_tree(lat, lon)
-tree = quad_tree.quad_tree(lat, lon)
+#tree = quad_tree.quad_tree(lat, lon)
 
 Screen_width  = 1024
 Screen_height = 720
@@ -128,11 +128,9 @@ def insert(x,y):
 	p.draw()
 	x_ = (x - Screen_width/2)/scalex
 	y_ = (Screen_height/2 - y)/scaley
-	tree.insert(x_, y_)
-	tracks = tree.track(x_, y_)
-	draw_subdivision(tracks)
-
-
+	#tree.insert(x_, y_)
+	#tracks = tree.track(x_, y_)
+	#draw_subdivision(tracks)
 
 
 def clear_screen():
@@ -148,6 +146,12 @@ def mouseClicked(pos):
 	p.value = 0
 	# points.append(p)
 	p.draw()
+
+def regionCreated(start, end):
+	print(end[0] - start[0]," ",end[1] - start[1])
+	#end[0] - start[0]
+	#end[1] - start[1]
+	#send region coordinates
 
 
 
@@ -166,6 +170,8 @@ class Point():
 
 def main():
 	# insert_data(tree, data)
+	region_start_pos = 0
+	region_end_pos = 0
 	while True:
 		for events in pygame.event.get():
 			if events.type == QUIT:
@@ -174,9 +180,22 @@ def main():
 			if events.type == pygame.K_ESCAPE:
 				sys.exit(0)
 
-			if events.type == pygame.MOUSEBUTTONUP:
+			if events.type == pygame.MOUSEBUTTONUP and events.button == 1:
 				  pos = pygame.mouse.get_pos()
 				  mouseClicked(pos)
+
+			if events.type == pygame.MOUSEBUTTONDOWN and events.button == 3:
+				region_start_pos = pygame.mouse.get_pos()
+
+
+			if events.type == pygame.MOUSEBUTTONUP and events.button == 3:
+				region_end_pos = pygame.mouse.get_pos()
+				regionCreated(region_start_pos, region_end_pos)
+				w = region_end_pos[0] - region_start_pos[0]
+				h = region_end_pos[1] - region_start_pos[1]
+				zone = pygame.Rect(region_start_pos[0], region_start_pos[1], w, h) 
+				#pygame.draw.rect(screen, (255,255,255, 100), zone)
+				#pygame.display.flip()
 
 
 if __name__ == '__main__':
