@@ -36,34 +36,33 @@ def draw_subdivision_driver(tracks, x, y, w, h):
 		if track == "origin":
 			pass
 		elif(track == "NW"):
+			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
+			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
 			w = w/2
 			h = h/2
 			x = x
 			y = y
-			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
 		elif(track == "NE"):
+			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
+			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
 			w = w/2
 			h = h/2
 			x = x+w
 			y = y
+		elif(track == "SW"):
 			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
 			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
-		elif(track == "SW"):
 			w = w/2
 			h = h/2
 			x = x
 			y = y+h
+		elif(track == "SE"):
 			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
 			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
-			print(x,y,w,h)
-		elif(track == "SE"):
 			w = w/2
 			h = h/2
 			x = x+w
 			y = y+h
-			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
-			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
 
 		pygame.display.flip()
 
