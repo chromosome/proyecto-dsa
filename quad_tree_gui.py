@@ -1,28 +1,85 @@
 import sys, pygame
 from pygame.locals import*
+import numpy as np
+
+import math
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return qx, qy
 
 import quad_tree
 
 ###################################################################
 
+# data = np.genfromtxt("test.csv", 
+# 					 dtype=np.double, 
+# 					 delimiter=';', 
+# 					 skip_header=1,
+# 					 usecols=(5, 6),
+# 					 max_rows=20000)
+
+# print(data)
+
+data = np.empty((1,2),dtype=np.double)
+# print(data.shape)
+
+with open("worldcitiespop_fixed.csv") as f:
+	f.readline()
+	count = 0
+	for line in f:
+		line = line.strip().split(';')
+		line = line[7].split(',')
+		x, y = float(line[0]), float(line[1])
+		data = np.append(data, ((x, y),), axis=0)
+		count += 1
+		if count > 2000:
+			break
+
+def insert_data(tree, data):
+	for d in data:
+		# print(d)
+		x = d[0]*scalex + Screen_width/2
+		y = Screen_height/2 - d[1]*scaley
+		insert(x, y)
+
+
 # GLOBALES
 
-Screen_width  = 800
-Screen_height = 800
+lat, lon = 90, 180
+# tree = quad_tree.quad_tree(lat, lon)
+tree = quad_tree.quad_tree(lat, lon)
+
+Screen_width  = 1024
+Screen_height = 720
+
+scalex = Screen_width/(lat*2)
+scaley = Screen_height/(lon*2)
 
 Color_screen = (0,0,0)
 Color_line   = (255,0,0)
 Color_circle = (0,255,0)
-circle_radius = 5
+circle_radius = 2
 
 screen = pygame.display.set_mode((Screen_width, Screen_height))
+
+screen.blit(pygame.transform.flip(screen, False, False), (0, 0))
+screen.blit(pygame.transform.rotate(screen, 45), (0, 0))
+
 pygame.display.set_caption('Deku Tree')
 
 screen.fill(Color_screen)
 pygame.display.flip()
-pygame.transform.flip(screen, False, False)
 
-tree = quad_tree.quad_tree(Screen_width/2, Screen_height/2)
 points = []
 
 ###################################################################
@@ -34,7 +91,7 @@ def draw_subdivision_driver(tracks, x, y, w, h):
 		if track != 'ORIGIN':
 			pygame.draw.line(screen,Color_line,(x + w/2,y),(x+w/2,y+h))
 			pygame.draw.line(screen,Color_line,(x,y+h/2),(x+w,y+h/2))
-			print(x,y,w,h)
+			# print(x,y,w,h)
 
 		if(track == "NW"):
 			w = w/2
@@ -56,7 +113,7 @@ def draw_subdivision_driver(tracks, x, y, w, h):
 			x = x+w
 			y = y+h
 
-		pygame.display.flip()
+		# pygame.display.flip()
 
 
 def draw_subdivision(tracks):
@@ -65,10 +122,16 @@ def draw_subdivision(tracks):
 
 def insert(x,y):
 	p = Point()
-	p.center = (x,y)
+	p.center = (int(x),int(y))
 	p.value = 0
-	points.append(p)
 	p.draw()
+	x_ = (x - Screen_width/2)/scalex
+	y_ = (Screen_height/2 - y)/scaley
+	tree.insert(x_, y_)
+	tracks = tree.track(x_, y_)
+	draw_subdivision(tracks)
+
+
 
 
 def clear_screen():
@@ -77,15 +140,13 @@ def clear_screen():
 
 
 def mouseClicked(pos):
-	print(pos)
+	p = Point()
+	# print(pos)
 	insert(pos[0], pos[1])
-	x = pos[0] - Screen_width/2
-	y = Screen_height/2 - pos[1]
-	print(x, y)
-	tree.insert(x, y)
-	tracks = tree.track(x, y)
-	print(tracks)
-	draw_subdivision(tracks)
+	p.center = (int(pos[0]),int(pos[1]))
+	p.value = 0
+	# points.append(p)
+	p.draw()
 
 
 
@@ -103,14 +164,19 @@ class Point():
 ###################################################################
 
 def main():
+	# insert_data(tree, data)
 	while True:
 		for events in pygame.event.get():
 			if events.type == QUIT:
 				sys.exit(0)
 
-			if events.type == pygame.MOUSEBUTTONDOWN:
+			if events.type == pygame.K_ESCAPE:
+				sys.exit(0)
+
+			if events.type == pygame.MOUSEBUTTONUP:
 				  pos = pygame.mouse.get_pos()
 				  mouseClicked(pos)
 
 
-main()
+if __name__ == '__main__':
+	main()
