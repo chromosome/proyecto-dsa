@@ -122,6 +122,7 @@ static PyMethodDef quad_tree_methods[] = {
 	{ "insert", (PyCFunction) quad_tree_insert, METH_VARARGS, "inserts a point"        },
 	{ "remove", (PyCFunction) quad_tree_remove, METH_VARARGS, "removes a point"        },
 	{ "track",  (PyCFunction) quad_tree_track,  METH_VARARGS, "tracks a point"         },
+	{ "region search",  (PyCFunction) quad_tree_region_search,  METH_VARARGS, "query area points"},
 	{NULL}
 };
 
